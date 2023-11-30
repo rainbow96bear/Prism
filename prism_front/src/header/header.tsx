@@ -2,15 +2,23 @@ import styled from "styled-components";
 
 import Logo from "./Components/logo";
 import Category from "./Components/category";
+import SearchBox from "./Components/searchBox";
+import FuncBar from "./Components/funcBar";
 
 const Header = () => {
   return (
     <Box>
-      <Left>
-        <S_Logo></S_Logo>
-        <S_Category></S_Category>
-      </Left>
-      <Right></Right>
+      <Group className="CategoryGroup">
+        <Logo></Logo>
+        <Category></Category>
+      </Group>
+
+      <Group className="SearchGroup">
+        <SearchBox></SearchBox>
+      </Group>
+      <Group className="FuncBarGroup">
+        <FuncBar></FuncBar>
+      </Group>
     </Box>
   );
 };
@@ -19,17 +27,27 @@ export default Header;
 
 const Box = styled.div`
   display: flex;
+  justify-content: space-between;
   height: 55px;
-  padding: 0px 10px;
+  padding: 0px 5%;
   border-bottom: 2px solid gray;
-  div {
-    padding: 0px 10px;
+  .CategoryGroup {
     display: flex;
+    font-weight: bold;
+    width: 25%;
+    min-width: 265px;
+  }
+  .SearchGroup {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    min-width: 265px;
+  }
+  .FuncBarGroup {
+    width: 25%;
+    min-width: 265px;
   }
 `;
 
-const Left = styled.div``;
-const Right = styled.div``;
-
-const S_Logo = styled(Logo)``;
-const S_Category = styled(Category)``;
+const Group = styled.div``;
