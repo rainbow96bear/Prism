@@ -13,6 +13,5 @@ const Logo = () => {
 export default Logo;
 
 const LogoImg = styled.img`
-  height: 100%;
   cursor: pointer;
 `;
