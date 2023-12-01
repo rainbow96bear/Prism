@@ -12,7 +12,6 @@ const Header = () => {
         <Logo></Logo>
         <Category></Category>
       </Group>
-
       <Group className="SearchGroup">
         <SearchBox></SearchBox>
       </Group>
@@ -28,9 +27,7 @@ export default Header;
 const Box = styled.div`
   display: flex;
   justify-content: space-between;
-  height: 55px;
-  padding: 0px 5%;
-  border-bottom: 2px solid gray;
+  height: 100%;
   .CategoryGroup {
     display: flex;
     font-weight: bold;
