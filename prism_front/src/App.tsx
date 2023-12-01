@@ -3,12 +3,14 @@ import styled from "styled-components";
 import Header from "./header/header";
 import Main from "./main/main";
 import Login from "./login/login";
-import { Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 function App() {
   return (
     <Box>
-      <Route path="/kakaoLogin" Component={Login}></Route>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+      </Routes>
       <HeaderArea>
         <Header></Header>
       </HeaderArea>
