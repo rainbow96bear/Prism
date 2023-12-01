@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
 	KakaoLogin "prism_back/kakaoLogin"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -14,8 +14,16 @@ func main() {
 	port := 8080
 	r := mux.NewRouter()
 
+	corsMiddleware := handlers.CORS(
+        handlers.AllowedOrigins([]string{"http://localhost:3000"}), // Change "*" to the actual front-end server's URL in production
+        handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
+        handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+    )
+	r.Use(corsMiddleware)
 	r.HandleFunc("/kakaoLogin", KakaoLogin.KakaoLogin).Methods("GET")
+	// r.HandleFunc("/login", KakaoLogin.KakaoLogin).Methods("GET")
 	log.Println("Prism Server Starting on Port :", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprint(":", port), r))
+	http.Handle("/", r)
+	http.ListenAndServe(":8080", nil)
 }
 
