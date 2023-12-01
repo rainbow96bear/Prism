@@ -1,4 +1,4 @@
-package kakaoLogin
+package KakaoLogin
 
 import (
 	"net/http"
