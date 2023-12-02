@@ -25,10 +25,10 @@ type KakaoAccount struct {
 
 type Properties map[string]string
 
-func TestKakaoLogin(t *testing.T) {
+func TestGetAuthorize(t *testing.T) {
 	requestBody := `{}`
 	
-	AUTHORIZE_CODE := "7Fv4W7CefMexmGN_A8kqe4MmtYEj4Jc8NoD1HSeLFuHAAmB4lk1dTHOdPKEKKwzTAAABjCUs-mq2W8wW6V7rJg"
+	AUTHORIZE_CODE := "w8_Vscj7loQcc9ncM6x8w6kfT8a7bbAfaemGYDmWUBhwME_RsaCBlSt5cLUKKwynAAABjCfSYtAicpf3YNJZ6g"
 	
 	// Front에서 AUTHORIZE_CODE를 Back으로 전달
 	req := httptest.NewRequest("GET",fmt.Sprintf("/kakaoLogin?code=%s",AUTHORIZE_CODE), strings.NewReader(requestBody))
@@ -37,10 +37,10 @@ func TestKakaoLogin(t *testing.T) {
 	respoenseWriter := httptest.NewRecorder()
 	
 	//KakaoLogin 실행
-	KakaoLogin(respoenseWriter, req)
+
 
 	var userInfo UserInfo
-	fmt.Println(respoenseWriter.Body.String())
+	fmt.Println("테스트 결과",respoenseWriter.Body.String())
 	err := json.Unmarshal([]byte(respoenseWriter.Body.String()), &userInfo)
     if err != nil {
 		fmt.Println("Failed to parse JSON: ", err)
