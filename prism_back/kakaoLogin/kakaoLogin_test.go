@@ -1,56 +1,38 @@
 package KakaoLogin
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
-type UserInfo struct {
-	ID          int       `json:"id"`
-	ConnectedAt string `json:"connected_at"`
-	KakaoAccount KakaoAccount `json:"kakao_account"`
-	Properties  Properties  `json:"properties"`
+func TestGetToken(t * testing.T) {
 
+	resRecoder := httptest.NewRecorder()
+	
+	code := ""
+	req := httptest.NewRequest("GET", "/kakao/withToken?code="+code,nil)
+	req.Header.Set("Content-Type","application/x-www-form-urlencoded")
+	token, err := GetToken(resRecoder, req)
+
+	if err != nil {
+		fmt.Println("token 획득 실패")
+	}
+	fmt.Println("테스트 결과 : ",token)
 }
 
-type KakaoAccount struct {
-	ProfileNicknameNeedsAgreement bool `json:"profile_nickname_needs_agreement"`
-	Profile struct {
-		Nickname string `json:"nickname"`
-	} `json:"profile"`
-}
-
-type Properties map[string]string
-
-func TestGetAuthorize(t *testing.T) {
-	requestBody := `{}`
-	
-	AUTHORIZE_CODE := "w8_Vscj7loQcc9ncM6x8w6kfT8a7bbAfaemGYDmWUBhwME_RsaCBlSt5cLUKKwynAAABjCfSYtAicpf3YNJZ6g"
-	
-	// Front에서 AUTHORIZE_CODE를 Back으로 전달
-	req := httptest.NewRequest("GET",fmt.Sprintf("/kakaoLogin?code=%s",AUTHORIZE_CODE), strings.NewReader(requestBody))
-	req.Header.Set("Content_type", "application/json")
-	
-	respoenseWriter := httptest.NewRecorder()
-	
-	//KakaoLogin 실행
-
-
-	var userInfo UserInfo
-	fmt.Println("테스트 결과",respoenseWriter.Body.String())
-	err := json.Unmarshal([]byte(respoenseWriter.Body.String()), &userInfo)
-    if err != nil {
-		fmt.Println("Failed to parse JSON: ", err)
-		return
+func TestGetUserInfo(t *testing.T) {
+	access_token := "" 
+	user, err := GetUserInfo(access_token)
+	if err != nil {
+		fmt.Println(err)
 	}
-	nickName := userInfo.KakaoAccount.Profile.Nickname
-	if nickName != "" {
-		fmt.Println("성공", nickName)
+	expectedUserID := ""
+	
+	if user.NickName == expectedUserID {
+		fmt.Println("성공")
+		fmt.Println(user)
 	}
-
 }
 
 
