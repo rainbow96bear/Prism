@@ -45,7 +45,6 @@ func OAuthLoginAfterProcess(res http.ResponseWriter, req *http.Request){
 	if err != nil {
 		fmt.Println("정보 획득 실패: ", err)
 	}
-	fmt.Println("user정보 확인", user)
 	// json.NewEncoder(res).Encode(user)
 	MakeCookie(res, user)
 	http.Redirect(res, req, "http://localhost:3000/home", http.StatusFound)
@@ -132,7 +131,6 @@ func GetUserInfo(Access_token string) (User, error){
 	}
 	body, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
-	fmt.Println(string(body))
 	err = json.Unmarshal(body, &user)
 	if err != nil {
 		return user, fmt.Errorf("Unmarshal 오류 : %v\n", err)
@@ -143,12 +141,13 @@ func GetUserInfo(Access_token string) (User, error){
 
 // cookie 만들기
 func MakeCookie(res http.ResponseWriter, user User) {
+	fmt.Println(fmt.Sprintf("ID=%s,NickName=%s,Img=%s",user.ID, user.NickName, user.ProfileImg))
+	encodedNickName := url.QueryEscape(user.NickName)
 	cookie := http.Cookie{
-		Name : "kakaoLogin",
-		Value : fmt.Sprintf("%s",user.ID),
+		Name : "kakaoUser",
+		Value : fmt.Sprintf("ID=%s,NickName=%s,Img=%s",user.ID, encodedNickName, user.ProfileImg),
 		Expires: time.Now().Add(30 * 24 * time.Hour),
 		Path:    "/",
-		HttpOnly: true,
 	}
 	http.SetCookie(res, &cookie)
 }

@@ -2,21 +2,15 @@ import styled from "styled-components";
 
 import Header from "./header/header";
 import Main from "./main/main";
-import Login from "./login/login";
 import { Route, Routes } from "react-router-dom";
 
 function App() {
   return (
     <Box>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-      </Routes>
       <HeaderArea>
         <Header></Header>
       </HeaderArea>
-      <BodyArea>
-        <Main></Main>
-      </BodyArea>
+      <BodyArea>{/* <Main></Main> */}</BodyArea>
     </Box>
   );
 }
@@ -30,7 +24,7 @@ const Box = styled.div`
 `;
 const HeaderArea = styled.div`
   width: 100%;
-  height: 55px;
+  height: 70px;
   border-bottom: 2px solid gray;
 `;
 

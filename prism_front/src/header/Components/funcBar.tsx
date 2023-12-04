@@ -1,15 +1,20 @@
 import styled from "styled-components";
+import { useEffect, useState } from "react";
 
-import BeforeLogin from "./afterLogin";
 import AfterLogin from "./beforeLogin";
+import BeforeLogin from "./afterLogin";
 
 const FuncBar: React.FC = () => {
-  return (
-    <Box>
-      {/* <BeforeLogin /> */}
-      <AfterLogin />
-    </Box>
-  );
+  const [hasKakaoUserCookie, setHasKakaoUserCookie] = useState(false);
+
+  useEffect(() => {
+    const kakaoUserValue = document.cookie;
+    const hasCookie = kakaoUserValue.includes("kakaoUser");
+
+    setHasKakaoUserCookie(hasCookie);
+  }, []);
+
+  return <Box>{hasKakaoUserCookie ? <BeforeLogin /> : <AfterLogin />}</Box>;
 };
 
 export default FuncBar;
