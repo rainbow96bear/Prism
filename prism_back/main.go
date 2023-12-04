@@ -20,8 +20,8 @@ func main() {
         handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
     )
 	r.Use(corsMiddleware)
-	r.HandleFunc("/kakaoLogin", KakaoLogin.GetAuthorize).Methods("GET")
-	r.HandleFunc("/kakaoToken", KakaoLogin.GetToken).Methods("GET")
+	r.HandleFunc("/kakao/login", KakaoLogin.OAuthLogin).Methods("GET")
+	r.HandleFunc("/kakao/withToken", KakaoLogin.OAuthLoginAfterProcess).Methods("GET")
 	// r.HandleFunc("/login", KakaoLogin.KakaoLogin).Methods("GET")
 	log.Println("Prism Server Starting on Port :", port)
 	http.Handle("/", r)
