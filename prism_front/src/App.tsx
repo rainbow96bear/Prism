@@ -10,7 +10,9 @@ function App() {
       <HeaderArea>
         <Header></Header>
       </HeaderArea>
-      <BodyArea>{/* <Main></Main> */}</BodyArea>
+      <BodyArea>
+        <Main></Main>
+      </BodyArea>
     </Box>
   );
 }
@@ -23,6 +25,8 @@ const Box = styled.div`
   align-items: center;
 `;
 const HeaderArea = styled.div`
+  display: flex;
+  justify-content: center;
   width: 100%;
   height: 70px;
   border-bottom: 2px solid gray;
@@ -32,5 +36,7 @@ const BodyArea = styled.div`
   width: 100%;
   max-width: 70%;
   height: auto;
-  background-color: blue;
+  border: 1px solid lightgray;
+  border-top: none;
+  border-bottom: none;
 `;

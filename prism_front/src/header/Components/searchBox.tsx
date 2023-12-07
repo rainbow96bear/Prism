@@ -7,6 +7,6 @@ const SearchBox = () => {
 export default SearchBox;
 
 const Search = styled.input`
-  width: 100%;
+  width: 90%;
   height: 50%;
 `;

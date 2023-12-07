@@ -27,23 +27,25 @@ export default Header;
 const Box = styled.div`
   display: flex;
   justify-content: space-between;
+
+  width: 90%;
   height: 100%;
   .CategoryGroup {
     display: flex;
     font-weight: bold;
-    width: 25%;
-    min-width: 265px;
+    flex: 1;
+    min-width: 277px;
   }
   .SearchGroup {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 50%;
-    min-width: 265px;
+    flex: 2;
+    min-width: 277px;
   }
   .FuncBarGroup {
-    width: 25%;
-    min-width: 265px;
+    flex: 1;
+    min-width: 277px;
   }
 `;
 

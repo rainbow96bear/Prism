@@ -36,13 +36,13 @@ const Category: React.FC = () => {
 
 const Box = styled.div`
   display: flex;
-  font-size: 1.3rem;
   height: 100%;
   div {
     margin: 0px 10px 0px 10px;
     display: flex;
     align-items: center;
     cursor: pointer;
+    font-size: 1.3rem;
   }
 `;
 
