@@ -25,7 +25,8 @@ var MainDB *sql.DB
 
 func setupDB() {
     var err error
-    MainDB, err = sql.Open("mysql", "root:0000@tcp(localhost:3306)/prism")
+	MYSQL_PW := os.Getenv("MYSQL_PW")
+    MainDB, err = sql.Open("mysql", "root:"+MYSQL_PW+"@tcp(localhost:3306)/prism")
     if err != nil {
         fmt.Println("Failed to open test DB:", err)
         return

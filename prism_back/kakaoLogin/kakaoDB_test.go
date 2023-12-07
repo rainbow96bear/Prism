@@ -14,8 +14,9 @@ var testDB *sql.DB
 
 
 func setupTestDB() {
-    var err error
-    testDB, err = sql.Open("mysql", "root:0000@tcp(localhost:3306)/test_prism")
+    err := godotenv.Load("./../.env")
+    MYSQL_PW := os.Getenv("MYSQL_PW")
+    testDB, err = sql.Open("mysql", "root:"+MYSQL_PW+"@tcp(localhost:3306)/test_prism")
     if err != nil {
         fmt.Println("Failed to open test DB:", err)
         return
