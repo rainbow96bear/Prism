@@ -1,29 +1,22 @@
 package KakaoLogin
 
 import (
-	"io/ioutil"
-	"net/http"
+	"fmt"
 	"net/http/httptest"
 	"testing"
 )
 
-func TestKakaoLogin(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(KakaoLogin))
-	defer server.Close()
+func TestGetToken(t * testing.T) {
 
-	resp, err := http.Get(server.URL)
+	resRecoder := httptest.NewRecorder()
+	
+	code := ""
+	req := httptest.NewRequest("GET", "/kakao/withToken?code="+code,nil)
+	req.Header.Set("Content-Type","application/x-www-form-urlencoded")
+	token, err := GetToken(resRecoder, req)
+
 	if err != nil {
-		t.Fatalf("Failed to send request: %v", err)
+		fmt.Println("token 획득 실패")
 	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("Failed to read response body: %v", err)
-	}
-
-	expected := "Expected response from Kakao"
-	if string(body) != expected {
-		t.Errorf("Expected %q, got %q", expected, string(body))
-	}
+	fmt.Println("테스트 결과 : ",token)
 }

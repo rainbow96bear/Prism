@@ -2,13 +2,11 @@ import styled from "styled-components";
 
 import Header from "./header/header";
 import Main from "./main/main";
-import Login from "./login/login";
-import { Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 function App() {
   return (
     <Box>
-      <Route path="/kakaoLogin" Component={Login}></Route>
       <HeaderArea>
         <Header></Header>
       </HeaderArea>
@@ -27,8 +25,10 @@ const Box = styled.div`
   align-items: center;
 `;
 const HeaderArea = styled.div`
+  display: flex;
+  justify-content: center;
   width: 100%;
-  height: 55px;
+  height: 70px;
   border-bottom: 2px solid gray;
 `;
 
@@ -36,5 +36,7 @@ const BodyArea = styled.div`
   width: 100%;
   max-width: 70%;
   height: auto;
-  background-color: blue;
+  border: 1px solid lightgray;
+  border-top: none;
+  border-bottom: none;
 `;

@@ -2,19 +2,19 @@ import styled from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
 
 interface CommunityProps {
-  isCommunity: boolean;
+  iscommunity: string;
 }
 
 interface ProjectProps {
-  isProject: boolean;
+  isproject: string;
 }
 
 const Category: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isCommunity: boolean = location.pathname === "/community";
-  const isProject: boolean = location.pathname === "/project";
+  const iscommunity: string = String(location.pathname === "/community");
+  const isproject: string = String(location.pathname === "/project");
 
   const handleCommunityClick = () => {
     navigate("/community");
@@ -24,10 +24,10 @@ const Category: React.FC = () => {
   };
   return (
     <Box>
-      <Community onClick={handleCommunityClick} isCommunity={isCommunity}>
+      <Community onClick={handleCommunityClick} iscommunity={iscommunity}>
         커뮤니티
       </Community>
-      <Project onClick={handleProjectClick} isProject={isProject}>
+      <Project onClick={handleProjectClick} isproject={isproject}>
         프로젝트
       </Project>
     </Box>
@@ -36,23 +36,27 @@ const Category: React.FC = () => {
 
 const Box = styled.div`
   display: flex;
-  font-size: 1.3rem;
   height: 100%;
   div {
     margin: 0px 10px 0px 10px;
     display: flex;
     align-items: center;
     cursor: pointer;
+    font-size: 1.3rem;
   }
 `;
 
 const Community = styled.div<CommunityProps>`
-  color: ${({ isCommunity }) => (isCommunity ? "black" : "lightgray")};
-  border-bottom: ${({ isCommunity }) => (isCommunity ? "4px solid green" : "")};
+  color: ${({ iscommunity }) =>
+    iscommunity === "true" ? "black" : "lightgray"};
+  border-bottom: ${({ iscommunity }) =>
+    iscommunity === "true" ? "4px solid green" : ""};
 `;
+
 const Project = styled.div<ProjectProps>`
-  color: ${({ isProject }) => (isProject ? "black" : "lightgray")};
-  border-bottom: ${({ isProject }) => (isProject ? "4px solid green" : "")};
+  color: ${({ isproject }) => (isproject === "true" ? "black" : "lightgray")};
+  border-bottom: ${({ isproject }) =>
+    isproject === "true" ? "4px solid green" : ""};
 `;
 
 export default Category;
