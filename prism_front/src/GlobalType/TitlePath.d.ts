@@ -1,4 +1,5 @@
 export interface TitlePath {
   title: string;
-  path: string;
+  path?: string;
+  func?: Function;
 }

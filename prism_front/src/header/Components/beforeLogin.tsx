@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 import loginImg from "./../../assets/kakao_login_small.png";
 
-const AfterLogin: React.FC = () => {
+const BeforeLogin: React.FC = () => {
   // oauth 요청 URL
   const handleLogin = () => {
     window.location.href = "http://localhost:8080/kakao/login";
@@ -16,7 +16,7 @@ const AfterLogin: React.FC = () => {
   );
 };
 
-export default AfterLogin;
+export default BeforeLogin;
 
 const ButtomBox = styled.div`
   height: 50%;

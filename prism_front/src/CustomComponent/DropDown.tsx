@@ -40,7 +40,11 @@ const DropDown: React.FC<ComponentProps> = ({ list, setDropdown }) => {
         <Item
           key={"dropdown" + index}
           onClick={() => {
-            move(item.path);
+            if (item?.path != null) {
+              move(item.path);
+            } else if (item.func != null) {
+              item.func();
+            }
           }}>
           {item.title}
         </Item>

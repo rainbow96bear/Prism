@@ -2,39 +2,34 @@ import styled from "styled-components";
 import { FaRegBell } from "react-icons/fa";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { FaRegEdit } from "react-icons/fa";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import axios from "axios";
 
 import DropDown from "../../CustomComponent/DropDown";
 import { TitlePath } from "../../GlobalType/TitlePath";
+import { useNavigate } from "react-router-dom";
 
-const BeforeLogin: React.FC = () => {
-  const [imgSrc, setImgSrc] = useState("");
-  const [profilePath, setProfilePath] = useState("");
+interface AfterLoginProps {
+  userID?: string;
+  imgUrl?: string;
+}
+
+const AfterLogin: React.FC<AfterLoginProps> = ({ userID, imgUrl }) => {
   const [dropdown, setDropdown] = useState(false);
-
-  useEffect(() => {
-    // 쿠키에서 Img 및 ID 값 가져오기
-    const kakaoUserValue = document.cookie;
-    const newstring = kakaoUserValue.substring(1, kakaoUserValue.length - 1);
-    const imgMatch = newstring.match(/Img=([^,]+)/);
-    const imgValue = imgMatch ? decodeURIComponent(imgMatch[1]) : "";
-
-    const IdMatch = newstring.match(/ID=([^,]+)/);
-    const userIDValue = IdMatch ? decodeURIComponent(IdMatch[1]) : "";
-
-    // Img의 값이 있다면 state에 저장
-    if (imgValue) {
-      setImgSrc(imgValue);
+  const navigate = useNavigate();
+  const logout = async () => {
+    try {
+      await axios.get("http://localhost:8080/kakao/logout", {
+        withCredentials: true,
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
     }
-
-    // ID 값이 있다면 profilePath를 생성하여 state에 저장
-    if (userIDValue) {
-      setProfilePath(`/profile/${userIDValue}`);
-    }
-  }, []);
-
-  const DropDown_List: TitlePath[] = [{ title: "프로필", path: profilePath }];
-
+  };
+  const DropDown_List: TitlePath[] = [
+    { title: "프로필", path: `/profile/${userID}` },
+    { title: "로그아웃", func: logout },
+  ];
   return (
     <>
       <ButtonBox>
@@ -49,13 +44,13 @@ const BeforeLogin: React.FC = () => {
       <ButtonBox>
         <ProfileImg
           onClick={() => setDropdown(!dropdown)}
-          src={imgSrc}
+          src={imgUrl}
           alt="User Profile"
         />
 
         {dropdown ? (
           <S_DropDown onClick={() => setDropdown(!dropdown)}>
-            <DropDown list={DropDown_List} setDropdown={setDropdown}></DropDown>
+            <DropDown list={DropDown_List} setDropdown={setDropdown} />
           </S_DropDown>
         ) : (
           <></>
@@ -65,7 +60,7 @@ const BeforeLogin: React.FC = () => {
   );
 };
 
-export default BeforeLogin;
+export default AfterLogin;
 
 const ButtonBox = styled.div`
   position: relative;
