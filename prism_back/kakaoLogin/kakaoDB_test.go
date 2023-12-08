@@ -80,7 +80,7 @@ func teardownTestDB(){
 //     }
 // }
 
-func TestGetUserInfo_and_Save(t *testing.T) {
+func TestGetGetUserInfo_from_kakao_and_Save(t *testing.T) {
     setupTestDB()
 	defer teardownTestDB()
     err := godotenv.Load("./../.env")
@@ -89,7 +89,7 @@ func TestGetUserInfo_and_Save(t *testing.T) {
     }
     TEMP_TOKEN := os.Getenv("TEMP_TOKEN")
 
-    user, err := GetUserInfo(TEMP_TOKEN)
+    user, err := GetUserInfo_from_kakao(TEMP_TOKEN)
    
     Read_Result, err := R_UserInfo(user,testDB)
     fmt.Println("R_UserInfo 결과 : ", Read_Result)
