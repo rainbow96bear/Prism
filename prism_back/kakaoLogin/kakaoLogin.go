@@ -1,3 +1,4 @@
+// kakaoLogin.go
 package KakaoLogin
 
 import (
@@ -10,35 +11,23 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 )
 
-var SECRET_KEY string = os.Getenv("SECRET_KEY")
-var store = sessions.NewCookieStore([]byte(SECRET_KEY))
-
 var err = godotenv.Load(".env")
+var Mainstore *sessions.CookieStore
+var myToken string = ""
 var MainDB *sql.DB
 
-func setupDB() {
-    var err error
-	MYSQL_PW := os.Getenv("MYSQL_PW")
-    MainDB, err = sql.Open("mysql", "root:"+MYSQL_PW+"@tcp(localhost:3306)/prism")
-    if err != nil {
-        fmt.Println("Failed to open test DB:", err)
-        return
-    }
+func SetupDB(db *sql.DB) {
+    MainDB = db
+}
 
-    // 데이터베이스에 연결되었는지 확인
-    if err := MainDB.Ping(); err != nil {
-        fmt.Println("Failed to connect to test DB:", err)
-        return
-    }
-
-    fmt.Println("Connected to test DB")
+func SetupStore(store *sessions.CookieStore) {
+	Mainstore = store
 }
 
 // OAuthLogin 시작
@@ -55,16 +44,16 @@ func OAuthLogin(res http.ResponseWriter, req *http.Request) {
 // User 정보 처리
 func OAuthLoginAfterProcess(res http.ResponseWriter, req *http.Request) {
 	token, err := GetToken(res, req)
+
 	if err != nil {
 		fmt.Println("Token 획득 실패: ", err)
 	}
 	// Access_token을 이용한 user 정보 받기
-	user, err := GetUserInfo(token.Access_token)
+	user, err := GetUserInfo_from_kakao(token.Access_token)
 	if err != nil {
 		fmt.Println("정보 획득 실패: ", err)
 	}
-	setupDB()
-	fmt.Println(MainDB)
+
 	isSavedID, err := IsSavedID(user, MainDB)
 	if err != nil {
 		fmt.Println(err)
@@ -76,7 +65,10 @@ func OAuthLoginAfterProcess(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 	 
-	MakeCookie(res, user)
+	err = CreateSession(res, req, user) 
+	if err != nil {
+		fmt.Println("session 문제 : ", err)
+	}
 	http.Redirect(res, req, "http://localhost:3000/home", http.StatusFound)
 }
 
@@ -135,12 +127,12 @@ func GetToken(res http.ResponseWriter, req *http.Request) (Token, error) {
 		fmt.Println("JSON 파싱 오류:", err)
 		return token, err
 	}
-
+	myToken = token.Access_token
 	return token, nil
 }
 
 // User 정보 가져오기
-func GetUserInfo(AccessToken string) (User, error) {
+func GetUserInfo_from_kakao(AccessToken string) (User, error) {
 	var user User
 	requestURL := "https://kapi.kakao.com/v1/oidc/userinfo"
 
@@ -166,19 +158,7 @@ func GetUserInfo(AccessToken string) (User, error) {
 	return user, nil
 }
 
-// Cookie 만들기
-func MakeCookie(res http.ResponseWriter, user User) {
-	encodedNickName := url.QueryEscape(user.NickName)
-	cookie := http.Cookie{
-		Name:    "kakaoUser",
-		Value:   fmt.Sprintf("ID=%s,NickName=%s,Img=%s", user.ID, encodedNickName, user.ProfileImg),
-		Expires: time.Now().Add(30 * 24 * time.Hour),
-		Path:    "/",
-	}
-	http.SetCookie(res, &cookie)
-}
-
-//DB에 기록된 ID인지 확인하기
+// DB에 기록된 ID인지 확인하기
 func IsSavedID(user User, db *sql.DB) (bool, error) {
 	list, err := R_UserInfo(user, db)
 	if err != nil {
@@ -193,7 +173,7 @@ func IsSavedID(user User, db *sql.DB) (bool, error) {
 
 // User 정보 읽기
 func R_UserInfo(user User, db *sql.DB) ([]User, error) {
-    query := "SELECT * FROM userinfo WHERE id = ?"
+	query := "SELECT * FROM userinfo WHERE id = ?"
 	id, _ := strconv.Atoi(user.ID)
 	rows, err := db.Query(query, id)
 	if err != nil {
@@ -205,7 +185,7 @@ func R_UserInfo(user User, db *sql.DB) ([]User, error) {
 		if err := rows.Scan(&data.ID, &data.NickName, &data.ProfileImg); err != nil {
 			return nil, err
 		}
-		result = append(result, data)  // 이 부분이 누락되어 있었습니다.
+		result = append(result, data)
 	}
     return result, nil
 }
@@ -218,4 +198,51 @@ func C_UserInfo(user User, db *sql.DB) error {
 		return fmt.Errorf("사용자 정보 저장 실패")
 	}
 	return nil
+}
+
+func CreateSession(res http.ResponseWriter, req *http.Request, user User) error {
+	session, err := Mainstore.Get(req, "user_login")
+	if err != nil {
+		fmt.Println("세션을 가져오는데 문제 발생:", err)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return err
+	}
+	session.Values["User_ID"] = user.ID
+	session.Values["User_ProfileImg"] = user.ProfileImg
+	err = session.Save(req, res)
+
+	if err != nil {
+		fmt.Println("세션을 저장하는데 문제 발생:", err)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return err
+	}
+	return nil
+}
+
+func Logout(res http.ResponseWriter, req *http.Request) {
+	session, err := Mainstore.Get(req, "user_login")
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	session.Values["User_ID"] = nil
+	session.Values["User_ProfileImg"] = nil
+	err = session.Save(req, res)
+
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+	}
+
+	// 브라우저에 저장된 쿠키를 만료시켜 제거
+	http.SetCookie(res, &http.Cookie{
+		Name:   "user_login",
+		Value:  "",
+		MaxAge: -1,
+		Domain: "localhost",
+		Path:   "/",
+	})
+
+	fmt.Println("로그아웃")
+	return
 }
