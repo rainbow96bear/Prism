@@ -29,13 +29,11 @@ const FuncBar: React.FC = () => {
   useEffect(() => {
     const User_Login = document.cookie;
     const hasCookie = User_Login.includes("user_login");
-    console.log(hasCookie);
     if (hasCookie) {
       getUserInfo();
     } else {
       setUserInfo(null);
     }
-    console.log(userInfo);
   }, []);
 
   return (
