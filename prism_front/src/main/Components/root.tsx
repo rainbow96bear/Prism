@@ -1,5 +1,5 @@
 const Root = () => {
-  return <div></div>;
+  return <div>root입니다.</div>;
 };
 
 export default Root;

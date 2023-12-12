@@ -15,9 +15,12 @@ const FuncBar: React.FC = () => {
 
   const getUserInfo = async () => {
     try {
-      const result = await axios.get("http://localhost:8080/userinfo", {
-        withCredentials: true,
-      });
+      const result = await axios.get(
+        "http://localhost:8080/userInfo/lightInfo",
+        {
+          withCredentials: true,
+        }
+      );
 
       const { sub, picture } = result.data;
       setUserInfo({ userID: sub, imgUrl: picture });

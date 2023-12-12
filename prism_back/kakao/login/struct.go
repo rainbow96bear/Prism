@@ -16,7 +16,7 @@ type Token struct {
 
 // kakao user 정보
 type User struct {
-	ID         string `json:"sub"`
-	NickName   string `json:"nickname,omitempty"`
-	ProfileImg string `json:"picture,omitempty"`
+	User_id     string `json:"sub"`
+	Nickname    string `json:"nickname,omitempty"`
+	Profile_img string `json:"picture,omitempty"`
 }

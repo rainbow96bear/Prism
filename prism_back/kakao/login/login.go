@@ -49,7 +49,7 @@ func OAuthLoginAfterProcess(res http.ResponseWriter, req *http.Request) {
 		fmt.Println(err)
 	}
 	if !isSavedID && err == nil {
-		err = C_UserInfo(user, Mysql.DB)
+		_, err = C_UserInfo(user, Mysql.DB)
 		if err != nil {
 			fmt.Println("User 정보 저장 실패")
 		}
@@ -150,44 +150,44 @@ func GetUserInfo_from_kakao(AccessToken string) (User, error) {
 
 // DB에 기록된 ID인지 확인하기
 func IsSavedID(user User, db *sql.DB) (bool, error) {
-	list, err := R_UserInfo(user, db)
+	user_from_DB, err := R_UserInfo(user, db)
 	if err != nil {
 		fmt.Println(err)
 		return false, err
 	}
-	if len(list) != 0 {
+	if user_from_DB.User_id != "" {
 		return true, nil
 	}
 	return false, nil
 }
 
 // User 정보 읽기
-func R_UserInfo(user User, db *sql.DB) ([]User, error) {
-	query := "SELECT * FROM userinfo WHERE id = ?"
-	id, _ := strconv.Atoi(user.ID)
+func R_UserInfo(user User, db *sql.DB) (User, error) {
+	query := "SELECT User_id FROM user_info WHERE User_id = ?"
+	id, _ := strconv.Atoi(user.User_id)
 	rows, err := db.Query(query, id)
 	if err != nil {
-		return nil, fmt.Errorf("User Id 값 읽기 실패")
+		return User{}, fmt.Errorf("User Id 값 읽기 실패")
 	}
 	result := []User{}
 	for rows.Next() {
 		var data User
-		if err := rows.Scan(&data.ID, &data.NickName, &data.ProfileImg); err != nil {
-			return nil, err
+		if err := rows.Scan(&data.User_id, &data.Nickname, &data.Profile_img); err != nil {
+			return User{}, err
 		}
 		result = append(result, data)
 	}
-    return result, nil
+    return result[0], nil
 }
 
-func C_UserInfo(user User, db *sql.DB) error {
-	query := "INSERT INTO userinfo (ID, NickName, ProfileImg) VALUES (?, ?, ?)"
-	result, err := db.Exec(query, user.ID, user.NickName, user.ProfileImg)
+func C_UserInfo(user User, db *sql.DB)  (User, error) {
+	query := "INSERT INTO user_info (User_id, Nickname, Profile_img) VALUES (?, ?, ?)"
+	result, err := db.Exec(query, user.User_id, user.Nickname, user.Profile_img)
 	fmt.Println("C_UesrInfo 결과 : ", result)
 	if err != nil {
-		return fmt.Errorf("사용자 정보 저장 실패")
+		return User{}, fmt.Errorf("사용자 정보 저장 실패")
 	}
-	return nil
+	return user, nil
 }
 
 func CreateSession(res http.ResponseWriter, req *http.Request, user User) error {
@@ -197,8 +197,8 @@ func CreateSession(res http.ResponseWriter, req *http.Request, user User) error 
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return err
 	}
-	session.Values["User_ID"] = user.ID
-	session.Values["User_ProfileImg"] = user.ProfileImg
+	session.Values["User_ID"] = user.User_id
+	session.Values["User_ProfileImg"] = user.Profile_img
 	err = session.Save(req, res)
 
 	if err != nil {

@@ -7,7 +7,6 @@ import axios from "axios";
 
 import DropDown from "../../CustomComponent/DropDown";
 import { TitlePath } from "../../GlobalType/TitlePath";
-import { useNavigate } from "react-router-dom";
 
 interface AfterLoginProps {
   userID?: string;

@@ -1,7 +1,7 @@
 package UserInfo
 
 import (
-	"prism_back/userInfo/LightInfo"
+	LightInfo "prism_back/userInfo/lightInfo"
 
 	"github.com/gorilla/mux"
 )

@@ -1,29 +1,26 @@
 import styled from "styled-components";
+import { Route, Routes, BrowserRouter as Router } from "react-router-dom";
 
 import Header from "./header/header";
 import Main from "./main/main";
-import { Route, Routes } from "react-router-dom";
 
 function App() {
   return (
     <Box>
-      <HeaderArea>
-        <Header></Header>
-      </HeaderArea>
-      <BodyArea>
-        <Main></Main>
-      </BodyArea>
+      <Routes>
+        <Route path="/*" element={<MainComponent />} />
+        <Route path="/admin/*" element={<AdminComponent />} />
+      </Routes>
     </Box>
   );
 }
-
-export default App;
 
 const Box = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
+
 const HeaderArea = styled.div`
   display: flex;
   justify-content: center;
@@ -40,3 +37,39 @@ const BodyArea = styled.div`
   border-top: none;
   border-bottom: none;
 `;
+
+const AdminHeader = () => {
+  return <div>Admin Header</div>;
+};
+
+const AdminBody = () => {
+  return <div>Admin Body</div>;
+};
+
+const AdminComponent = () => {
+  return (
+    <>
+      <HeaderArea>
+        <AdminHeader />
+      </HeaderArea>
+      <BodyArea>
+        <AdminBody />
+      </BodyArea>
+    </>
+  );
+};
+
+const MainComponent = () => {
+  return (
+    <>
+      <HeaderArea>
+        <Header />
+      </HeaderArea>
+      <BodyArea>
+        <Main />
+      </BodyArea>
+    </>
+  );
+};
+
+export default App;
