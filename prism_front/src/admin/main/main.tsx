@@ -30,7 +30,7 @@ const AdminMain = () => {
     <div>
       <Routes>
         <Route path="/" element={<Root setAdmin_info={setAdmin_info} />} />
-        <Route path="/home" element={<Home admin_info={admin_info} />} />
+        <Route path="/home/*" element={<Home admin_info={admin_info} />} />
       </Routes>
     </div>
   );
