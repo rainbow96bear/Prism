@@ -3,6 +3,8 @@ import { Route, Routes, BrowserRouter as Router } from "react-router-dom";
 
 import Header from "./header/header";
 import Main from "./main/main";
+import AdminHeader from "./admin/header/header";
+import AdminMain from "./admin/main/main";
 
 function App() {
   return (
@@ -38,22 +40,14 @@ const BodyArea = styled.div`
   border-bottom: none;
 `;
 
-const AdminHeader = () => {
-  return <div>Admin Header</div>;
-};
-
-const AdminBody = () => {
-  return <div>Admin Body</div>;
-};
-
 const AdminComponent = () => {
   return (
     <>
       <HeaderArea>
-        <AdminHeader />
+        <AdminHeader></AdminHeader>
       </HeaderArea>
       <BodyArea>
-        <AdminBody />
+        <AdminMain></AdminMain>
       </BodyArea>
     </>
   );

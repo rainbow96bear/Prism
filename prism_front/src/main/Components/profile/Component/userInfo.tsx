@@ -15,32 +15,11 @@ const UserInfo = () => {
     navigator(path);
   };
 
+  // cookie에서 Id를 가져오던 방법에서 Profile을 정보를 받아올 때 true false 지정하여 응답 받기
+
   useEffect(() => {
-    const kakaoUserValue = document.cookie;
-    const newstring = kakaoUserValue.substring(1, kakaoUserValue.length - 1);
-    const imgMatch = newstring.match(/Img=([^,]+)/);
-    const imgValue = imgMatch ? decodeURIComponent(imgMatch[1]) : "";
-
-    if (imgValue) {
-      setImgSrc(imgValue);
-    }
-
-    const nickNameMatch = newstring.match(/NickName=([^,]+)/);
-    const nickNameValue = nickNameMatch
-      ? decodeURIComponent(nickNameMatch[1])
-      : "";
-
-    if (nickNameValue) {
-      setNickName(nickNameValue);
-    }
-
-    const idMatch = newstring.match(/ID=([^,]+)/);
-    const idValue = idMatch ? decodeURIComponent(idMatch[1]) : "";
-
-    setIsUser(idValue === id);
-
     const getProfile = async () => {
-      // const result = await axios.get(`http://localhost:8000/profile?id=${id}`);
+      // const result = await axios.get(`http://localhost:8000/user/profile?id=${id}`);
     };
     getProfile();
   }, [id]);
