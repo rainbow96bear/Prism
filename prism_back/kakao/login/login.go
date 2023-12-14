@@ -10,9 +10,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+
 	Mysql "prism_back/DataBase/MySQL"
 	Session "prism_back/session"
-	"strconv"
+	Profile "prism_back/user/profile"
 
 	"github.com/joho/godotenv"
 )
@@ -49,9 +50,13 @@ func OAuthLoginAfterProcess(res http.ResponseWriter, req *http.Request) {
 		fmt.Println(err)
 	}
 	if !isSavedID && err == nil {
-		_, err = C_UserInfo(user, Mysql.DB)
+		_, err = C_user_info(user, Mysql.DB)
 		if err != nil {
-			fmt.Println("User 정보 저장 실패")
+			fmt.Println(err)
+		}
+		_, err = Profile.C_profile(user.User_id, Mysql.DB)
+		if err != nil {
+			fmt.Println(err)
 		}
 	}
 	 
@@ -150,7 +155,7 @@ func GetUserInfo_from_kakao(AccessToken string) (User, error) {
 
 // DB에 기록된 ID인지 확인하기
 func IsSavedID(user User, db *sql.DB) (bool, error) {
-	user_from_DB, err := R_UserInfo(user, db)
+	user_from_DB, err := R_user_info(user, db)
 	if err != nil {
 		fmt.Println(err)
 		return false, err
@@ -162,10 +167,9 @@ func IsSavedID(user User, db *sql.DB) (bool, error) {
 }
 
 // User 정보 읽기
-func R_UserInfo(user User, db *sql.DB) (User, error) {
+func R_user_info(user User, db *sql.DB) (User, error) {
 	query := "SELECT User_id FROM user_info WHERE User_id = ?"
-	id, _ := strconv.Atoi(user.User_id)
-	rows, err := db.Query(query, id)
+	rows, err := db.Query(query, user.User_id)
 	if err != nil {
 		return User{}, fmt.Errorf("User Id 값 읽기 실패")
 	}
@@ -177,17 +181,29 @@ func R_UserInfo(user User, db *sql.DB) (User, error) {
 		}
 		result = append(result, data)
 	}
-    return result[0], nil
+	if len(result) > 0 {
+		return result[0], nil
+	}
+	return User{}, nil
 }
 
-func C_UserInfo(user User, db *sql.DB)  (User, error) {
+func C_user_info(user User, db *sql.DB)  (User, error) {
 	query := "INSERT INTO user_info (User_id, Nickname, Profile_img) VALUES (?, ?, ?)"
-	result, err := db.Exec(query, user.User_id, user.Nickname, user.Profile_img)
-	fmt.Println("C_UesrInfo 결과 : ", result)
+	_, err := db.Exec(query, user.User_id, user.Nickname, user.Profile_img)
 	if err != nil {
 		return User{}, fmt.Errorf("사용자 정보 저장 실패")
 	}
 	return user, nil
+}
+
+func C_profile(user User, db *sql.DB) (string, error) {
+	query := "INSERT INTO profile (user_info_User_id) VALUES (?)"
+	result, err := db.Exec(query, user.User_id)
+	fmt.Println("C_UesrInfo 결과 : ", result)
+	if err != nil {
+		return user.User_id, fmt.Errorf("프로필 생성 실패")
+	}
+	return user.User_id, nil
 }
 
 func CreateSession(res http.ResponseWriter, req *http.Request, user User) error {

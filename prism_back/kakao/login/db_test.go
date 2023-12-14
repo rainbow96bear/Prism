@@ -38,49 +38,7 @@ func teardownTestDB(){
 	}
 }
 
-// func TestR_UserInfo(t * testing.T) {
-// 	setupTestDB()
-// 	defer teardownTestDB()
-
-// 	userToCreate := User{
-//         ID:          "5555",
-//         NickName:    "무지개곰",
-//         ProfileImg:  "http://example.com/profile.jpg",
-//     }
-
-// 	result, err := R_UserInfo(userToCreate, testDB)
-//     if err != nil {
-//         t.Fatalf("Failed to create user: %v", err)
-//     }
-//     if result == nil {
-//         t.Fatalf("결과가 nil")
-//     }
-
-//     fmt.Println("Read(UserInfo) 테스트 완료")
-// }
-
-// func TestIsSavedID(t *testing.T){
-//     setupTestDB()
-// 	defer teardownTestDB()
-
-//     userToCreate := User{
-//         ID:          "444",
-//         NickName:    "무지개곰",
-//         ProfileImg:  "http://example.com/profile.jpg",
-//     }
-//     isSavedID, err := IsSavedID(userToCreate, testDB)
-//     if err != nil {
-//         return
-//     }
-//     if !isSavedID {
-//         err := C_UserInfo(userToCreate, testDB)
-//         if err != nil {
-//             t.Fatal("생성 실패")
-//         }
-//     }
-// }
-
-func TestGetGetUserInfo_from_kakao_and_Save(t *testing.T) {
+func Test_GetGetUserInfo_from_kakao_and_Save(t *testing.T) {
     setupTestDB()
 	defer teardownTestDB()
     err := godotenv.Load("./../.env")
@@ -91,14 +49,14 @@ func TestGetGetUserInfo_from_kakao_and_Save(t *testing.T) {
 
     user, err := GetUserInfo_from_kakao(TEMP_TOKEN)
    
-    Read_Result, err := R_UserInfo(user,testDB)
+    Read_Result, err := R_user_info(user,testDB)
     fmt.Println("R_UserInfo 결과 : ", Read_Result)
     isSavedID, err := IsSavedID(user, testDB)
     if err != nil {
         return
     }
     if !isSavedID {
-        err := C_UserInfo(user, testDB)
+        _, err := C_user_info(user, testDB)
         if err != nil {
             t.Fatal("생성 실패")
         }

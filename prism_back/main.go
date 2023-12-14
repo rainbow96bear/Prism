@@ -7,7 +7,7 @@ import (
 	Mysql "prism_back/DataBase/MySQL"
 	Kakao "prism_back/kakao"
 	Session "prism_back/session"
-	UserInfo "prism_back/userInfo"
+	User "prism_back/user"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -33,7 +33,7 @@ func main() {
 	r.Use(corsMiddleware)
 
 	Kakao.RegisterHandlers(r.PathPrefix("/kakao").Subrouter())
-	UserInfo.RegisterHandlers(r.PathPrefix("/userInfo").Subrouter())
+	User.RegisterHandlers(r.PathPrefix("/userInfo").Subrouter())
 
 	log.Println("Prism Server Starting on Port :", port)
 	// 라우터에 CORS 미들웨어 추가
