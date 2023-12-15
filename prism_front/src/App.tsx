@@ -34,21 +34,18 @@ const HeaderArea = styled.div`
 const BodyArea = styled.div`
   width: 100%;
   max-width: 70%;
-  height: auto;
+  min-height: calc(100vh - 72px);
   border: 1px solid lightgray;
   border-top: none;
   border-bottom: none;
+  box-sizing: border-box;
+  position: relative;
 `;
 
 const AdminComponent = () => {
   return (
     <>
-      <HeaderArea>
-        <AdminHeader></AdminHeader>
-      </HeaderArea>
-      <BodyArea>
-        <AdminMain></AdminMain>
-      </BodyArea>
+      <AdminMain></AdminMain>
     </>
   );
 };

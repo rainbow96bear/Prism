@@ -1,11 +1,13 @@
 import styled from "styled-components";
 import Logo from "./components/logo";
+import FuncBar from "./components/funcBar";
 
 const AdminHeader = () => {
   return (
     <Box>
       <Group className="CategoryGroup">
         <Logo></Logo>
+        <FuncBar></FuncBar>
       </Group>
     </Box>
   );

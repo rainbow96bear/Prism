@@ -17,32 +17,25 @@ const Root: React.FC<setAdmin_info> = ({ setAdmin_info }) => {
 
   const handleSubmit = async () => {
     try {
-      const loginResult = await axios.post(
-        "http://localhost:8080/admin/user/login",
-        { password: password } // 비밀번호를 객체 형태로 body에 담아 전송
-      );
-      setAdmin_info(loginResult.data);
-      navigate(`http://localhost:3000/admin/home`);
+      const loginResult = (
+        await axios.post(
+          "http://localhost:8080/admin/user/login",
+          { password: password },
+          {
+            withCredentials: true,
+          }
+        )
+      ).data;
+      if (loginResult?.admin_info.id != "") {
+        setAdmin_info(loginResult?.admin_info);
+        navigate(`/admin/home/${loginResult?.admin_info.id}`);
+      } else {
+        alert("접근 번호를 정확히 입력하세요.");
+      }
     } catch (error) {
       console.error("Admin 정보를 가져오는 중 에러 발생:", error);
     }
   };
-
-  useEffect(() => {
-    const checkAdmin = async () => {
-      try {
-        const loginResult = await axios.post(
-          "http://localhost:8080/admin/user/login"
-        );
-        setAdmin_info(loginResult.data);
-        navigate(`http://localhost:3000/admin/home`);
-      } catch (error) {
-        console.error("Admin 정보를 가져오는 중 에러 발생:", error);
-      }
-    };
-
-    checkAdmin();
-  }, []);
 
   return (
     <Box>
@@ -61,13 +54,7 @@ const Root: React.FC<setAdmin_info> = ({ setAdmin_info }) => {
 
 export default Root;
 
-const Box = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 50vh;
-`;
+const Box = styled.div``;
 
 const DescribeBox = styled.div`
   font-size: 20px;

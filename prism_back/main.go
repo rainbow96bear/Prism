@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	Mysql "prism_back/DataBase/MySQL"
+	Admin "prism_back/admin"
 	Kakao "prism_back/kakao"
 	Session "prism_back/session"
 	User "prism_back/user"
@@ -34,6 +35,7 @@ func main() {
 
 	Kakao.RegisterHandlers(r.PathPrefix("/kakao").Subrouter())
 	User.RegisterHandlers(r.PathPrefix("/userInfo").Subrouter())
+	Admin.RegisterHandlers(r.PathPrefix("/admin").Subrouter())
 
 	log.Println("Prism Server Starting on Port :", port)
 	// 라우터에 CORS 미들웨어 추가

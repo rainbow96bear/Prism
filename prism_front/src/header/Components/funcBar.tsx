@@ -16,7 +16,7 @@ const FuncBar: React.FC = () => {
   const getUserInfo = async () => {
     try {
       const result = await axios.get(
-        "http://localhost:8080/userInfo/lightInfo",
+        "http://localhost:8080/userInfo/light_info",
         {
           withCredentials: true,
         }
