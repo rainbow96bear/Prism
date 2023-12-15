@@ -15,9 +15,12 @@ const FuncBar: React.FC = () => {
 
   const getUserInfo = async () => {
     try {
-      const result = await axios.get("http://localhost:8080/userinfo", {
-        withCredentials: true,
-      });
+      const result = await axios.get(
+        "http://localhost:8080/userInfo/light_info",
+        {
+          withCredentials: true,
+        }
+      );
 
       const { sub, picture } = result.data;
       setUserInfo({ userID: sub, imgUrl: picture });
@@ -29,13 +32,11 @@ const FuncBar: React.FC = () => {
   useEffect(() => {
     const User_Login = document.cookie;
     const hasCookie = User_Login.includes("user_login");
-    console.log(hasCookie);
     if (hasCookie) {
       getUserInfo();
     } else {
       setUserInfo(null);
     }
-    console.log(userInfo);
   }, []);
 
   return (

@@ -7,7 +7,6 @@ import axios from "axios";
 
 import DropDown from "../../CustomComponent/DropDown";
 import { TitlePath } from "../../GlobalType/TitlePath";
-import { useNavigate } from "react-router-dom";
 
 interface AfterLoginProps {
   userID?: string;
@@ -16,12 +15,16 @@ interface AfterLoginProps {
 
 const AfterLogin: React.FC<AfterLoginProps> = ({ userID, imgUrl }) => {
   const [dropdown, setDropdown] = useState(false);
-  const navigate = useNavigate();
   const logout = async () => {
     try {
       await axios.get("http://localhost:8080/kakao/logout", {
         withCredentials: true,
       });
+      const User_Login = document.cookie;
+      const hasCookie = User_Login.includes("user_login");
+      if (!hasCookie) {
+        window.location.href = "http://localhost:3000";
+      }
     } catch (error) {
       console.error("Logout failed:", error);
     }
