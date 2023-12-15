@@ -176,7 +176,7 @@ func R_user_info(user User, db *sql.DB) (User, error) {
 	result := []User{}
 	for rows.Next() {
 		var data User
-		if err := rows.Scan(&data.User_id, &data.Nickname, &data.Profile_img); err != nil {
+		if err := rows.Scan(&data.User_id); err != nil {
 			return User{}, err
 		}
 		result = append(result, data)
@@ -245,7 +245,7 @@ func Logout(res http.ResponseWriter, req *http.Request) {
 		Name:   "user_login",
 		Value:  "",
 		MaxAge: -1,
-		Domain: "localhost",
+		Domain: os.Getenv("COOKIE_DOMAIN"),
 		Path:   "/",
 	})
 

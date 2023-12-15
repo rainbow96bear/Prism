@@ -8,6 +8,6 @@ import (
 
 func RegisterHandlers(r *mux.Router) {
     
-    r.HandleFunc("/lightInfo", LightInfo.GetUserInfo_from_Session).Methods("GET")
+    r.HandleFunc("/light_info", LightInfo.GetUserInfo_from_Session).Methods("GET")
 }
 
