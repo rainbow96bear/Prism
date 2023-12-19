@@ -30,7 +30,8 @@ func AdminCheck(res http.ResponseWriter, req *http.Request) {
 		fmt.Println("에러 발생:", err)
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
-	 }
+	}
+	
 	defer rows.Close()
 	// 결과가 있는지 확인
 	var isAdmin bool
@@ -94,7 +95,7 @@ func AdminLogin(res http.ResponseWriter, req *http.Request) {
 	// 요청에서 전송된 비밀번호
 	decoder := json.NewDecoder(req.Body)
 
-	var requestData RequestData  // MyStruct는 적절한 구조체로 대체되어야 합니다.
+	var requestData RequestData
 
 	// JSON 디코딩
 	err = decoder.Decode(&requestData)

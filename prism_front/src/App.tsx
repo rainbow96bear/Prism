@@ -1,10 +1,12 @@
 import styled from "styled-components";
 import { Route, Routes, BrowserRouter as Router } from "react-router-dom";
+import Modal from "react-modal";
 
 import Header from "./header/header";
 import Main from "./main/main";
-import AdminHeader from "./admin/header/header";
 import AdminMain from "./admin/main/main";
+
+Modal.setAppElement("#root");
 
 function App() {
   return (
@@ -34,11 +36,10 @@ const HeaderArea = styled.div`
 const BodyArea = styled.div`
   width: 100%;
   max-width: 70%;
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 70px);
   border: 1px solid lightgray;
   border-top: none;
   border-bottom: none;
-  box-sizing: border-box;
   position: relative;
 `;
 
