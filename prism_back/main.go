@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	Mysql "prism_back/DataBase/MySQL"
-	"prism_back/Router/OAuth"
+	OAuth "prism_back/Routers/OAuths"
 	Admin "prism_back/admin"
 	Session "prism_back/session"
 	User "prism_back/user"
