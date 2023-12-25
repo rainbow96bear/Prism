@@ -1,7 +1,7 @@
 package OAuth
 
 import (
-	Kakao "prism_back/Router/OAuth/kakao"
+	"prism_back/Routers/OAuths/Kakao"
 	"prism_back/Structs/Users/KakaoUser"
 
 	"github.com/gorilla/mux"
