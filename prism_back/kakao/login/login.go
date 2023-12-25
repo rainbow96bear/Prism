@@ -78,7 +78,7 @@ func GetToken(res http.ResponseWriter, req *http.Request) (Token, error) {
 
 	// 요청에서 Authorization Code 가져오기
 	code := req.URL.Query().Get("code")
-
+	fmt.Println("임시 테스트를위한 code : ",code)
 	// 토큰 요청에 필요한 매개변수 구성
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")

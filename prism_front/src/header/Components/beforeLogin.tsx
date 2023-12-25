@@ -5,7 +5,7 @@ import loginImg from "./../../assets/kakao_login_small.png";
 const BeforeLogin: React.FC = () => {
   // oauth 요청 URL
   const handleLogin = () => {
-    window.location.href = "http://localhost:8080/kakao/login";
+    window.location.href = "http://localhost:8080/OAuth/kakao/login";
   };
   https: return (
     <>

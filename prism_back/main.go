@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 	Mysql "prism_back/DataBase/MySQL"
+	"prism_back/Router/OAuth"
 	Admin "prism_back/admin"
-	Kakao "prism_back/kakao"
 	Session "prism_back/session"
 	User "prism_back/user"
 
@@ -32,8 +32,7 @@ func main() {
 	)	
 	
 	r.Use(corsMiddleware)
-
-	Kakao.RegisterHandlers(r.PathPrefix("/kakao").Subrouter())
+	OAuth.RegisterHandlers(r.PathPrefix("/OAuth").Subrouter())
 	User.RegisterHandlers(r.PathPrefix("/userInfo").Subrouter())
 	Admin.RegisterHandlers(r.PathPrefix("/admin").Subrouter())
 

@@ -1,17 +1,19 @@
 package Kakao
 
 import (
-	Login "prism_back/kakao/login"
+	"prism_back/Structs/Users/KakaoUser"
 
 	"github.com/gorilla/mux"
 )
 
+var kakaoUser = &KakaoUser.KakaoUser{}
+
 func RegisterHandlers(r *mux.Router) {
     
-    r.HandleFunc("/login", Login.OAuthLogin).Methods("GET")
+    r.HandleFunc("/login", kakaoUser.Login).Methods("GET")
 
-    r.HandleFunc("/with_token", Login.OAuthLoginAfterProcess).Methods("GET")
+    r.HandleFunc("/with_token", kakaoUser.AfterProcessres).Methods("GET")
 
-    r.HandleFunc("/logout", Login.Logout).Methods("GET")
+    r.HandleFunc("/logout", kakaoUser.Logout).Methods("GET")
 }
 
