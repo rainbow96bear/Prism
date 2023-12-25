@@ -16,6 +16,7 @@ const AdminMain = () => {
 
   const navigate = useNavigate();
   useEffect(() => {
+    const originURL = window.location.pathname;
     const checkAdmin = async () => {
       try {
         const checkResult = (
@@ -29,9 +30,13 @@ const AdminMain = () => {
         if (checkResult?.correctAdmin == false) {
           navigate("/admin");
         }
-        console.log(checkResult?.admin_info);
+        setAdmin_info(checkResult?.admin_info);
         if (checkResult?.admin_info.id != null) {
-          setAdmin_info(checkResult?.admin_info);
+          if (originURL == "/admin") {
+            navigate("/admin/home");
+          } else {
+            navigate(originURL);
+          }
         }
         setIsAdmin(checkResult?.isAdmin);
       } catch (error) {
@@ -40,30 +45,24 @@ const AdminMain = () => {
     };
 
     checkAdmin();
-  }, []);
+  }, [window.location.pathname]);
 
   return (
     <>
-      <HeaderArea>
-        <AdminHeader></AdminHeader>
-      </HeaderArea>
+      {admin_info?.id != null ? (
+        <HeaderArea>
+          <AdminHeader></AdminHeader>
+        </HeaderArea>
+      ) : (
+        <></>
+      )}
       <BodyArea>
         <Box>
-          {isAdmin ? (
-            <Routes>
-              <Route
-                path="/"
-                element={<Root setAdmin_info={setAdmin_info} />}
-              />
-              <Route
-                path="/home/*"
-                element={<Home admin_info={admin_info} />}
-              />
-              <Route path="/setting/*" element={<Setting></Setting>} />
-            </Routes>
-          ) : (
-            <Loading></Loading>
-          )}
+          <Routes>
+            <Route path="/" element={<Root setAdmin_info={setAdmin_info} />} />
+            <Route path="/home/*" element={<Home admin_info={admin_info} />} />
+            <Route path="/setting/*" element={<Setting></Setting>} />
+          </Routes>
         </Box>
       </BodyArea>
     </>
@@ -82,12 +81,11 @@ const HeaderArea = styled.div`
 
 const BodyArea = styled.div`
   width: 100%;
-  min-height: calc(100vh - 72px);
+  padding-top: 50px;
+  min-height: calc(100vh - 70px);
   border: 1px solid lightgray;
   border-top: none;
   border-bottom: none;
-  box-sizing: border-box;
-  position: relative;
 `;
 
 const Box = styled.div`
@@ -97,9 +95,6 @@ const Box = styled.div`
   align-items: center;
   width: 100%;
   height: 100%;
-  position: absolute;
-  left: 0px;
-  top: 0px;
   > div {
     display: flex;
     flex-direction: column;
