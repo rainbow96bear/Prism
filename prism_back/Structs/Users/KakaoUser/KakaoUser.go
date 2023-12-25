@@ -23,7 +23,11 @@ func (k *KakaoUser) Login(res http.ResponseWriter, req *http.Request) {
 }
 
 func (k *KakaoUser)AfterProcessres(res http.ResponseWriter, req *http.Request) {
-	oAuthLoginAfterProcess(res, req)
+	err := oAuthLoginAfterProcess(res, req)
+	if err != nil {
+		
+	}
+	http.Redirect(res, req, "http://localhost:3000/home", http.StatusFound)
 }
 
 func (k *KakaoUser)Logout(res http.ResponseWriter, req *http.Request) {
@@ -41,23 +45,23 @@ func oAuthLogin(res http.ResponseWriter, req *http.Request) {
 	http.Redirect(res, req, redirectURL, http.StatusFound)
 }
 
-func oAuthLoginAfterProcess(res http.ResponseWriter, req *http.Request) {
+func oAuthLoginAfterProcess(res http.ResponseWriter, req *http.Request) (error) {
 	kakaoToken := &KakaoToken.Token{}
 	// kakao 토큰 받아서 kakaoToken 변수에 저장되길 바랍니다.
 	token, err := I_Token.GetToken(kakaoToken, res, req)
 	if err != nil {
-		fmt.Println("토큰 가져오기 실패 : ", err)
+		return fmt.Errorf("토큰 가져오기 실패 : %e", err)
 	}
 	// kakaoUser 정보 받아오기
 	kakaoUser, err := getUserInfo(token.(*KakaoToken.Token).Access_token)
 	if err != nil {
-		fmt.Println("사용자 정보 얻어오기 오류 : ", err)
+		return fmt.Errorf("사용자 정보 얻어오기 오류 : %e", err)
 	}
 	err = createSession(kakaoUser, res, req)
 	if err != nil {
-		fmt.Println("카카오 로그인 세션 생성 실패 : ", err)
+		return fmt.Errorf("카카오 로그인 세션 생성 실패 : %e", err)
 	}
-	http.Redirect(res, req, "http://localhost:3000/home", http.StatusFound)
+	return nil
 }
 
 // User 정보 가져오기

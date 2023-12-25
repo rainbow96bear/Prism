@@ -22,11 +22,11 @@ type Token struct {
 }
 
 func (t *Token)GetToken(res http.ResponseWriter, req *http.Request) (I_Token.I_Token, error){
-	token, err := GetToken(res, req)
+	token, err := getToken(res, req)
 	return token, err
 }
 
-func GetToken(res http.ResponseWriter, req *http.Request) (I_Token.I_Token, error) {
+func getToken(res http.ResponseWriter, req *http.Request) (I_Token.I_Token, error) {
 	var token Token
 	CLIENT_SECRET_KEY := os.Getenv("CLIENT_SECRET_KEY")
 	REST_API_KEY := os.Getenv("REST_API_KEY")
