@@ -27,11 +27,11 @@ const AdminMain = () => {
         if (checkResult?.isAdmin == false) {
           navigate("/");
         }
-        if (checkResult?.correctAdmin == false) {
+        if (checkResult?.admin_info.id == "") {
           navigate("/admin");
         }
         setAdmin_info(checkResult?.admin_info);
-        if (checkResult?.admin_info.id != null) {
+        if (checkResult?.admin_info.id != "") {
           if (originURL == "/admin") {
             navigate("/admin/home");
           } else {
