@@ -23,7 +23,7 @@ const Home: React.FC<HomeProps> = ({ admin_info }) => {
   };
   useEffect(() => {
     navigate(`/admin/home/${admin_info?.id}`);
-  }, []);
+  }, [admin_info]);
   return (
     <Box>
       <InfoBox>

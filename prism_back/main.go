@@ -5,10 +5,9 @@ import (
 	"log"
 	"net/http"
 	Mysql "prism_back/DataBase/MySQL"
-	OAuth "prism_back/Routers/OAuths"
-	Admin "prism_back/admin"
+	AdminRouter "prism_back/Routers/Admin"
+	OAuthRouter "prism_back/Routers/OAuths"
 	Session "prism_back/session"
-	User "prism_back/user"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -32,9 +31,8 @@ func main() {
 	)	
 	
 	r.Use(corsMiddleware)
-	OAuth.RegisterHandlers(r.PathPrefix("/OAuth").Subrouter())
-	User.RegisterHandlers(r.PathPrefix("/userInfo").Subrouter())
-	Admin.RegisterHandlers(r.PathPrefix("/admin").Subrouter())
+	OAuthRouter.RegisterHandlers(r.PathPrefix("/OAuth").Subrouter())
+	AdminRouter.RegisterHandlers(r.PathPrefix("/admin").Subrouter())
 
 	log.Println("Prism Server Starting on Port :", port)
 	// 라우터에 CORS 미들웨어 추가

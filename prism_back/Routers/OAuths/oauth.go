@@ -1,4 +1,4 @@
-package OAuth
+package OAuthRouter
 
 import (
 	"prism_back/Routers/OAuths/Kakao"

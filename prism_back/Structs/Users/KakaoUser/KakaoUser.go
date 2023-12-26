@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	Mysql "prism_back/DataBase/MySQL"
 	"prism_back/Interfaces/I_Token"
 	"prism_back/Structs/Tokens/KakaoToken"
 	Session "prism_back/session"
@@ -46,7 +47,14 @@ func (k *KakaoUser)AfterProcessres(res http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 	}
-
+	fmt.Println(isSavedID(kakaoUser.User_id))
+	if !isSavedID(kakaoUser.User_id) {
+		query := "INSERT INTO user_info (User_id, Nickname, Profile_img) VALUES (?, ?, ?)"
+		_, err := Mysql.DB.Exec(query, kakaoUser.User_id, kakaoUser.Nickname, kakaoUser.Profile_img)
+		if err != nil {
+			log.Println("사용자 정보 저장 실패 : ", err)
+		}
+	}
 	// kakaoUser 정보로 session 만들기
 	err = createSession(kakaoUser, res, req)
 	if err != nil {
@@ -152,4 +160,14 @@ func kakaoLogout(res http.ResponseWriter, req *http.Request) (error) {
 	})
 
 	return nil
+}
+
+func isSavedID(user_id string) bool {
+	query := "SELECT User_id FROM user_info WHERE User_id = ?"
+	userID := ""
+	err := Mysql.DB.QueryRow(query, user_id).Scan(&userID)
+	if err != nil{
+		return false
+	}
+	return true
 }
