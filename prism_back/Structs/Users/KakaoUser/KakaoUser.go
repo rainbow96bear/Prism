@@ -32,7 +32,7 @@ func (k *KakaoUser) Login(res http.ResponseWriter, req *http.Request) {
 }
 
 // OAuth의 Redirect URL에 대한 처리
-func (k *KakaoUser)AfterProcessres(res http.ResponseWriter, req *http.Request) {
+func (k *KakaoUser)AfterProcess(res http.ResponseWriter, req *http.Request) {
 	kakaoToken := &KakaoToken.Token{}
 	// OAuth로 받은 code로 Token 얻기
 	token, err := I_Token.GetToken(kakaoToken, res, req)
@@ -47,7 +47,6 @@ func (k *KakaoUser)AfterProcessres(res http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 	}
-	fmt.Println(isSavedID(kakaoUser.User_id))
 	if !isSavedID(kakaoUser.User_id) {
 		query := "INSERT INTO user_info (User_id, Nickname, Profile_img) VALUES (?, ?, ?)"
 		_, err := Mysql.DB.Exec(query, kakaoUser.User_id, kakaoUser.Nickname, kakaoUser.Profile_img)
