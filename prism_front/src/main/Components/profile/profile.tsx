@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 import UserInfo from "./Component/userInfo";
 import TechStack from "./Component/techStack";
-import axios from "axios";
+import axios from "./../../../configs/AxiosConfig";
 
 const Profile = () => {
   const checkCookie = () => {

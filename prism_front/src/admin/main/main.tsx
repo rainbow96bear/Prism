@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "./../../configs/AxiosConfig";
 
 import { Admin } from "../../GlobalType/Admin";
 import Root from "./components/root";
@@ -20,7 +20,7 @@ const AdminMain = () => {
     const checkAdmin = async () => {
       try {
         const checkResult = (
-          await axios.get("http://localhost:8080/admin/user/check", {
+          await axios.get("/admin/user/check", {
             withCredentials: true,
           })
         ).data;

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "./../../../configs/AxiosConfig";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -19,7 +19,7 @@ const Root: React.FC<setAdmin_info> = ({ setAdmin_info }) => {
     try {
       const loginResult = (
         await axios.post(
-          "http://localhost:8080/admin/user/login",
+          "/admin/user/login",
           { password: password },
           {
             withCredentials: true,

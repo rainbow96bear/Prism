@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Modal from "react-modal";
 import styled from "styled-components";
-import axios from "axios";
+import axios from "./../../../../configs/AxiosConfig";
 
 interface AddTechModalProps {
   isOpen: boolean;
@@ -30,7 +30,7 @@ const AddTechModal: React.FC<AddTechModalProps> = ({
     try {
       // Send a request to add a new entry
       const result = (
-        await axios.post("http://localhost:8080/admin/access/tech", newEntry, {
+        await axios.post("/admin/access/tech", newEntry, {
           withCredentials: true,
         })
       ).data;

@@ -3,7 +3,7 @@ import { FaRegBell } from "react-icons/fa";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { FaRegEdit } from "react-icons/fa";
 import { useState } from "react";
-import axios from "axios";
+import axios from "./../../configs/AxiosConfig";
 
 import DropDown from "../../CustomComponent/DropDown";
 import { TitlePath } from "../../GlobalType/TitlePath";
@@ -17,7 +17,7 @@ const AfterLogin: React.FC<AfterLoginProps> = ({ userID, imgUrl }) => {
   const [dropdown, setDropdown] = useState(false);
   const logout = async () => {
     try {
-      await axios.get("http://localhost:8080/OAuth/kakao/logout", {
+      await axios.get("/OAuth/kakao/logout", {
         withCredentials: true,
       });
       const User_Login = document.cookie;

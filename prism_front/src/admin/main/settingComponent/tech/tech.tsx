@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Table from "./table";
-import axios from "axios";
+import axios from "./../../../../configs/AxiosConfig";
 import AddTechModal from "./modal";
 
 // Tech 컴포넌트
@@ -23,7 +23,7 @@ const Tech = () => {
   };
   const getTechList = async () => {
     const list = (
-      await axios.get("http://localhost:8080/admin/access/tech", {
+      await axios.get("/admin/access/tech", {
         withCredentials: true,
       })
     ).data;

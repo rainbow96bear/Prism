@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import axios from "axios";
+import axios from "./../../../../configs/AxiosConfig";
 
 interface TableProps {
   column: string[];
@@ -35,7 +35,7 @@ const Table: React.FC<TableProps> = ({ column, info, getTechList }) => {
       // Axios로 서버에 저장 요청 보내기
       const result = (
         await axios.put(
-          "http://localhost:8080/admin/access/tech",
+          "/admin/access/tech",
           {
             editedValues: {
               Tech_code: editedValues?.Tech_code,
