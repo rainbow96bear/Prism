@@ -11,7 +11,7 @@ import (
 	"prism_back/internal/Database/mysql"
 	"prism_back/internal/session"
 	"prism_back/pkg/interface/basetoken"
-	"prism_back/pkg/models/tokens/kakaotoken"
+	kakaotoken "prism_back/pkg/models/tokens/kakao_token"
 )
 
 type KakaoUser struct {
