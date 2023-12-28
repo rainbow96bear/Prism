@@ -1,4 +1,4 @@
-package kakaoToken
+package kakaotoken
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"prism_back/internal/interface/baseToken"
+	"prism_back/pkg/interface/basetoken"
 )
 
 type Token struct {
@@ -21,12 +21,12 @@ type Token struct {
 	Refresh_token_expires_in int    `json:"refresh_token_expires_in"`
 }
 
-func (t *Token)GetToken(res http.ResponseWriter, req *http.Request) (BaseToken baseToken.BaseToken, err error){
+func (t *Token)GetToken(res http.ResponseWriter, req *http.Request) (BaseToken basetoken.BaseToken, err error){
 	token, err := getToken(res, req)
 	return token, err
 }
 
-func getToken(res http.ResponseWriter, req *http.Request) (BaseToken baseToken.BaseToken, err error) {
+func getToken(res http.ResponseWriter, req *http.Request) (BaseToken basetoken.BaseToken, err error) {
 	var token Token
 	CLIENT_SECRET_KEY := os.Getenv("CLIENT_SECRET_KEY")
 	REST_API_KEY := os.Getenv("REST_API_KEY")

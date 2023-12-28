@@ -1,12 +1,12 @@
 package kakao
 
 import (
-	"prism_back/pkg/models/user/kakaoUser"
+	"prism_back/pkg/models/user/kakaouser"
 
 	"github.com/gorilla/mux"
 )
 
-var user = &kakaoUser.KakaoUser{}
+var user = &kakaouser.KakaoUser{}
 
 func RegisterHandlers(r *mux.Router) {
     

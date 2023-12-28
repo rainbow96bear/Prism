@@ -1,4 +1,4 @@
-package kakaoUser
+package kakaouser
 
 import (
 	"encoding/json"
@@ -9,9 +9,9 @@ import (
 	"os"
 
 	"prism_back/internal/Database/mysql"
-	"prism_back/internal/interface/baseToken"
 	"prism_back/internal/session"
-	"prism_back/pkg/models/tokens/kakaoToken"
+	"prism_back/pkg/interface/basetoken"
+	"prism_back/pkg/models/tokens/kakaotoken"
 )
 
 type KakaoUser struct {
@@ -34,16 +34,16 @@ func (k *KakaoUser) Login(res http.ResponseWriter, req *http.Request) {
 
 // OAuth의 Redirect URL에 대한 처리
 func (k *KakaoUser)AfterProcess(res http.ResponseWriter, req *http.Request) {
-	kakao_Token := &kakaoToken.Token{}
+	kakao_Token := &kakaotoken.Token{}
 	// OAuth로 받은 code로 Token 얻기
-	token, err := baseToken.GetToken(kakao_Token, res, req)
+	token, err := basetoken.GetToken(kakao_Token, res, req)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 	}
 
 	// 얻은 Token으로 kakaoUser 정보 얻기
-	kakaoUser, err := getUserInfo(token.(*kakaoToken.Token).Access_token)
+	kakaoUser, err := getUserInfo(token.(*kakaotoken.Token).Access_token)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
@@ -74,7 +74,7 @@ func (k *KakaoUser)Logout(res http.ResponseWriter, req *http.Request) {
 }
 
 // OAuth 로그인을 위할 Redirection
-func makeRedirectURL(res http.ResponseWriter, req *http.Request) (string, error) {
+func makeRedirectURL(res http.ResponseWriter, req *http.Request) (redirect_uri string, err error) {
 	REST_API_KEY := os.Getenv("REST_API_KEY")
 	REDIRECT_URI := os.Getenv("REDIRECT_URI")
 	redirectURL := fmt.Sprintf("https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s",
@@ -85,7 +85,7 @@ func makeRedirectURL(res http.ResponseWriter, req *http.Request) (string, error)
 }
 
 // User 정보 가져오기
-func getUserInfo(AccessToken string) (KakaoUser, error){
+func getUserInfo(AccessToken string) (kakaoUser KakaoUser, err error){
 	var user KakaoUser
 	requestURL := "https://kapi.kakao.com/v1/oidc/userinfo"
 
@@ -120,7 +120,7 @@ func getUserInfo(AccessToken string) (KakaoUser, error){
 
 
 // 세션과 쿠키 생성
-func createSession(user KakaoUser, res http.ResponseWriter, req *http.Request) error {
+func createSession(user KakaoUser, res http.ResponseWriter, req *http.Request) (err error) {
 	session, err := session.Store.Get(req, "user_login")
 	if err != nil {
 		return fmt.Errorf("세션을 가져오는데 문제 발생 : %e", err)
@@ -137,7 +137,7 @@ func createSession(user KakaoUser, res http.ResponseWriter, req *http.Request) e
 
 
 // 로그아웃
-func kakaoLogout(res http.ResponseWriter, req *http.Request) (error) {
+func kakaoLogout(res http.ResponseWriter, req *http.Request) (err error) {
 	session, err := session.Store.Get(req, "user_login")
 	if err != nil {
 		return fmt.Errorf("세션 불러오기 실패 : %e", err)
@@ -163,7 +163,7 @@ func kakaoLogout(res http.ResponseWriter, req *http.Request) (error) {
 	return nil
 }
 
-func isSavedID(user_id string) bool {
+func isSavedID(user_id string) (isSaved bool){
 	query := "SELECT User_id FROM user_info WHERE User_id = ?"
 	userID := ""
 	err := mysql.DB.QueryRow(query, user_id).Scan(&userID)

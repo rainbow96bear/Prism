@@ -124,7 +124,7 @@ func (a *Admin)Logout(res http.ResponseWriter, req *http.Request){
 }
 
 // 세션으로 사용자 정보 확인
-func getUserIDFromSession(res http.ResponseWriter, req *http.Request) (string, error) {
+func getUserIDFromSession(res http.ResponseWriter, req *http.Request) (user_id string, err error) {
 	session, err := session.Store.Get(req, "user_login")
 	if err != nil {
 		return "", fmt.Errorf("user_login 세션 조회 실패 : %e", err)
@@ -138,7 +138,7 @@ func getUserIDFromSession(res http.ResponseWriter, req *http.Request) (string, e
 
 
 // 세션으로 관리자 정보 확인
-func getAdimUserInfoFromSession(res http.ResponseWriter, req *http.Request) (Admin, error) {
+func getAdimUserInfoFromSession(res http.ResponseWriter, req *http.Request) (admin_info Admin, err error) {
 	session, err := session.Store.Get(req, "admin_login")
 	var admin_user Admin
 	if err != nil {
@@ -159,13 +159,13 @@ func getAdimUserInfoFromSession(res http.ResponseWriter, req *http.Request) (Adm
 
 
 // 요청에서 비밀번호 확인
-func getPasswordFromRequest(req *http.Request) (string, error){
+func getPasswordFromRequest(req *http.Request) (password string, err error) {
 	type Password struct{
 		Password string `json:"password"`
 	}
 	var requestData Password
 	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&requestData)
+	err = decoder.Decode(&requestData)
 	if err != nil {
 		return requestData.Password, fmt.Errorf("디코딩 실패 : %e", err)
 	}
@@ -173,9 +173,8 @@ func getPasswordFromRequest(req *http.Request) (string, error){
 }
 
 // DB에서 관리자 정보 조회
-func getAdminUserInfoFromDB(userID string) (Admin, error){
-	var admin_user Admin
-	err := mysql.DB.QueryRow("SELECT `Admin_id`, `Rank`, `Password` FROM admin_user WHERE Admin_id = ?", userID).Scan(&admin_user.User_id, &admin_user.Rank, &admin_user.Password)
+func getAdminUserInfoFromDB(userID string) (admin_user Admin, err error){
+	err = mysql.DB.QueryRow("SELECT `Admin_id`, `Rank`, `Password` FROM admin_user WHERE Admin_id = ?", userID).Scan(&admin_user.User_id, &admin_user.Rank, &admin_user.Password)
 	if err != nil {
 		return admin_user, fmt.Errorf("DB 조회 실패 : %e", err)
 	}
@@ -184,7 +183,7 @@ func getAdminUserInfoFromDB(userID string) (Admin, error){
 
 
 // DB에 저장된 관리자 ID인지 확인
-func checkAdminByDB(userID string) (bool){
+func checkAdminByDB(userID string) (isAdmin bool){
 	row := mysql.DB.QueryRow("SELECT `Admin_id` FROM admin_user WHERE Admin_id = ?", userID)
 	if row.Err() != nil {
 		return false
@@ -194,7 +193,7 @@ func checkAdminByDB(userID string) (bool){
 
 
 // 비밀번호 비교
-func comparePassword(requestPassword, DBPassword string) bool {
+func comparePassword(requestPassword, DBPassword string) (correct bool) {
 	err := bcrypt.CompareHashAndPassword([]byte(DBPassword), []byte(requestPassword))
 	if err != nil {
 		return false
@@ -216,7 +215,7 @@ func adminLogout(res http.ResponseWriter, req *http.Request){
 
 
 // 세션 생성
-func createSession(admin_info Admin, res http.ResponseWriter, req *http.Request) (error) {
+func createSession(admin_info Admin, res http.ResponseWriter, req *http.Request) (err error) {
 	session, err := session.Store.Get(req, "admin_login")
 	if err != nil {
 		return fmt.Errorf("세션을 가져오는데 문제 발생 : %e", err)

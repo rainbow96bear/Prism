@@ -1,4 +1,4 @@
-package baseToken
+package basetoken
 
 import "net/http"
 
