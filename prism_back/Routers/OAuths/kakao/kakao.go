@@ -16,4 +16,3 @@ func RegisterHandlers(r *mux.Router) {
 
     r.HandleFunc("/logout", kakaoUser.Logout).Methods("GET")
 }
-

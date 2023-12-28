@@ -11,7 +11,7 @@ func TestGetToken(t * testing.T) {
 	resRecoder := httptest.NewRecorder()
 	
 	code := ""
-	req := httptest.NewRequest("GET", "/kakao/with_token?code="+code,nil)
+	req := httptest.NewRequest("GET", "?code="+code,nil)
 	req.Header.Set("Content-Type","application/x-www-form-urlencoded")
 	token, err := GetToken(resRecoder, req)
 

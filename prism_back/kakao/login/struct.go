@@ -1,9 +1,5 @@
 package Login
 
-type KakaoID struct {
-	isHave bool
-	Value  int
-}
 type Token struct {
 	Access_token             string `json:"access_token"`
 	Token_type               string `json:"token_type"`
