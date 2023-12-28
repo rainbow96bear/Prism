@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import axios from "axios";
+import axios from "./../../../../configs/AxiosConfig";
 
 const UserInfo = () => {
   const [imgSrc, setImgSrc] = useState("");

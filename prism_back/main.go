@@ -4,6 +4,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	Mysql "prism_back/DataBase/MySQL"
 	AdminRouter "prism_back/Routers/Admin"
 	OAuthRouter "prism_back/Routers/OAuths"
@@ -24,7 +25,7 @@ func main() {
 	Session.SetupStore()
 
 	corsMiddleware := handlers.CORS(
-		handlers.AllowedOrigins([]string{"http://localhost:3000"}),
+		handlers.AllowedOrigins([]string{os.Getenv("FRONT_DOMAIN")}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
 		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
 		handlers.AllowCredentials(),

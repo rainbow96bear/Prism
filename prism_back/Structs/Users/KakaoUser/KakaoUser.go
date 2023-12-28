@@ -60,7 +60,8 @@ func (k *KakaoUser)AfterProcess(res http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 	}
-	http.Redirect(res, req, "http://localhost:3000/home", http.StatusFound)
+	fmt.Println(os.Getenv("FRONT_DOMAIN"))
+	http.Redirect(res, req, fmt.Sprintf("%s/home", os.Getenv("FRONT_DOMAIN")), http.StatusFound)
 }
 
 func (k *KakaoUser)Logout(res http.ResponseWriter, req *http.Request) {

@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Admin } from "../../../GlobalType/Admin";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "./../../../configs/AxiosConfig";
 
 interface HomeProps {
   admin_info: Admin | null;
@@ -13,7 +13,7 @@ const Home: React.FC<HomeProps> = ({ admin_info }) => {
   const navigate = useNavigate();
   const logout = async () => {
     try {
-      await axios.get("http://localhost:8080/admin/user/logout", {
+      await axios.get("/admin/user/logout", {
         withCredentials: true,
       });
       navigate("/admin");

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import BeforeLogin from "./beforeLogin";
 import AfterLogin from "./afterLogin";
-import axios from "axios";
+import axios from "./../../configs/AxiosConfig";
 
 interface UserInfo {
   userID: string;
@@ -15,12 +15,9 @@ const FuncBar: React.FC = () => {
 
   const getUserInfo = async () => {
     try {
-      const result = await axios.get(
-        "http://localhost:8080/userInfo/light_info",
-        {
-          withCredentials: true,
-        }
-      );
+      const result = await axios.get("/userInfo/light_info", {
+        withCredentials: true,
+      });
 
       const { sub, picture } = result.data;
       setUserInfo({ userID: sub, imgUrl: picture });
