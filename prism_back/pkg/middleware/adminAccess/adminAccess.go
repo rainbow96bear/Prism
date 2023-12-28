@@ -1,4 +1,4 @@
-package adminAccess
+package adminaccess
 
 import (
 	"net/http"

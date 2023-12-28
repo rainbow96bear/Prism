@@ -2,7 +2,7 @@ package admin
 
 import (
 	"prism_back/pkg/handlers/admin/auth"
-	"prism_back/pkg/middleware/adminAccess"
+	"prism_back/pkg/middleware/adminaccess"
 	Tech "prism_back/pkg/models/tech"
 
 	"github.com/gorilla/mux"
@@ -13,7 +13,7 @@ import (
 func RegisterHandlers(r *mux.Router) {
 	auth.RegisterHandlers(r.PathPrefix("/user").Subrouter())
 	adminRouter := r.PathPrefix("/access").Subrouter()
-	adminRouter.Use(adminAccess.AdminMiddleware)
+	adminRouter.Use(adminaccess.AdminMiddleware)
 	AccessRequest(adminRouter)   
 }
 
