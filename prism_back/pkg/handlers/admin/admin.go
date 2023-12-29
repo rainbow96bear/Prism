@@ -2,7 +2,7 @@ package admin
 
 import (
 	"prism_back/pkg/handlers/admin/auth"
-	"prism_back/pkg/middleware/adminaccess"
+	adminaccess "prism_back/pkg/middleware/admin_access"
 	Tech "prism_back/pkg/models/tech"
 
 	"github.com/gorilla/mux"

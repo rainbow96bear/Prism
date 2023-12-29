@@ -1,4 +1,4 @@
-package kakaouser
+package user
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 	"prism_back/internal/Database/mysql"
 	"prism_back/internal/session"
 	"prism_back/pkg/interface/basetoken"
-	kakaotoken "prism_back/pkg/models/tokens/kakao_token"
+	"prism_back/pkg/models/kakao/token"
 )
 
 type KakaoUser struct {
@@ -34,16 +34,16 @@ func (k *KakaoUser) Login(res http.ResponseWriter, req *http.Request) {
 
 // OAuth의 Redirect URL에 대한 처리
 func (k *KakaoUser)AfterProcess(res http.ResponseWriter, req *http.Request) {
-	kakao_Token := &kakaotoken.Token{}
+	kakao_Token := &token.Token{}
 	// OAuth로 받은 code로 Token 얻기
-	token, err := basetoken.GetToken(kakao_Token, res, req)
+	baseToken, err := basetoken.GetToken(kakao_Token, res, req)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 	}
 
 	// 얻은 Token으로 kakaoUser 정보 얻기
-	kakaoUser, err := getUserInfo(token.(*kakaotoken.Token).Access_token)
+	kakaoUser, err := getUserInfo(baseToken.(*token.Token).Access_token)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)

@@ -1,4 +1,4 @@
-package kakaotoken
+package token
 
 import (
 	"bytes"
