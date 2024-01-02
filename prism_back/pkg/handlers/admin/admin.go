@@ -18,7 +18,7 @@ func RegisterHandlers(r *mux.Router) {
 }
 
 func AccessRequest(r *mux.Router) {
-    r.HandleFunc("/tech", Tech.Get_tech_list).Methods("GET")
-    r.HandleFunc("/tech", Tech.Post_tech_list).Methods("POST")
-    r.HandleFunc("/tech", Tech.Put_tech_list).Methods("PUT")
+    r.HandleFunc("/tech", Tech.GetTechList).Methods("GET")
+    r.HandleFunc("/tech", Tech.PostTechList).Methods("POST")
+    r.HandleFunc("/tech", Tech.PutTechList).Methods("PUT")
 }
