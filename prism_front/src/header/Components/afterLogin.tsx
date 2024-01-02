@@ -17,7 +17,7 @@ const AfterLogin: React.FC<AfterLoginProps> = ({ userID, imgUrl }) => {
   const [dropdown, setDropdown] = useState(false);
   const logout = async () => {
     try {
-      await axios.get("/OAuth/kakao/logout", {
+      await axios.post("/OAuth/kakao/logout", {
         withCredentials: true,
       });
       const User_Login = document.cookie;

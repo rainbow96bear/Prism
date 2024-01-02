@@ -23,7 +23,8 @@ type KakaoUser struct {
 // I_Login 인터페이스 메서드
 func (k *KakaoUser) Login(res http.ResponseWriter, req *http.Request) {
 	// OAuth 로그인을 위한 Redirect URL 생성
-	URL, err := makeRedirectURL(res, req)
+	fmt.Println("이건 ? 오긴 하나?")
+	URL, err := getRedirectURL()
 	if err != nil {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
@@ -33,7 +34,7 @@ func (k *KakaoUser) Login(res http.ResponseWriter, req *http.Request) {
 }
 
 // OAuth의 Redirect URL에 대한 처리
-func (k *KakaoUser)AfterProcess(res http.ResponseWriter, req *http.Request) {
+func (k *KakaoUser)GetUserInfo(res http.ResponseWriter, req *http.Request) {
 	kakao_Token := &token.Token{}
 	// OAuth로 받은 code로 Token 얻기
 	baseToken, err := basetoken.GetToken(kakao_Token, res, req)
@@ -48,6 +49,8 @@ func (k *KakaoUser)AfterProcess(res http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 	}
+	fmt.Println(kakaoUser.User_id)
+	fmt.Println(kakaoUser.User_id)
 	if !isSavedID(kakaoUser.User_id) {
 		query := "INSERT INTO user_info (User_id, Nickname, Profile_img) VALUES (?, ?, ?)"
 		_, err := mysql.DB.Exec(query, kakaoUser.User_id, kakaoUser.Nickname, kakaoUser.Profile_img)
@@ -61,8 +64,7 @@ func (k *KakaoUser)AfterProcess(res http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 	}
-	fmt.Println(os.Getenv("FRONT_DOMAIN"))
-	http.Redirect(res, req, fmt.Sprintf("%s/home", os.Getenv("FRONT_DOMAIN")), http.StatusFound)
+	http.Redirect(res, req, fmt.Sprintf("%s/home", os.Getenv("DOMAIN")), http.StatusFound)
 }
 
 func (k *KakaoUser)Logout(res http.ResponseWriter, req *http.Request) {
@@ -74,7 +76,7 @@ func (k *KakaoUser)Logout(res http.ResponseWriter, req *http.Request) {
 }
 
 // OAuth 로그인을 위할 Redirection
-func makeRedirectURL(res http.ResponseWriter, req *http.Request) (redirect_uri string, err error) {
+func getRedirectURL() (redirect_uri string, err error) {
 	REST_API_KEY := os.Getenv("REST_API_KEY")
 	REDIRECT_URI := os.Getenv("REDIRECT_URI")
 	redirectURL := fmt.Sprintf("https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s",

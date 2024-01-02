@@ -10,9 +10,9 @@ var kakaoUser = &user.KakaoUser{}
 
 func RegisterHandlers(r *mux.Router) {
     
-    r.HandleFunc("/login", kakaoUser.Login).Methods("GET")
+    r.HandleFunc("/code", kakaoUser.Login).Methods("GET")
 
-    r.HandleFunc("/with_token", kakaoUser.AfterProcess).Methods("GET")
+    r.HandleFunc("/userinfo", kakaoUser.GetUserInfo).Methods("GET")
 
-    r.HandleFunc("/logout", kakaoUser.Logout).Methods("GET")
+    r.HandleFunc("/logout", kakaoUser.Logout).Methods("POST")
 }

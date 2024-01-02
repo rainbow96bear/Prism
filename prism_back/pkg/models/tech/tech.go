@@ -1,10 +1,11 @@
-package Tech
+package tech
 
 import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
 	"prism_back/internal/Database/mysql"
 
 	_ "github.com/go-sql-driver/mysql" // MySQL 드라이버

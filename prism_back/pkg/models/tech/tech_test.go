@@ -1,4 +1,4 @@
-package Tech
+package tech
 
 import (
 	"database/sql"
