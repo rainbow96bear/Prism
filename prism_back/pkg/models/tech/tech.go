@@ -25,7 +25,7 @@ type PutTechData struct {
 
 var err = godotenv.Load("./../../.env")
 
-func Get_tech_list(res http.ResponseWriter, req *http.Request) {
+func GetTechList(res http.ResponseWriter, req *http.Request) {
 	// GetTechList 함수를 통해 데이터베이스에서 기술 목록을 가져옴
 	list, err := R_TechList(mysql.DB)
 	if err != nil {
@@ -49,7 +49,7 @@ func Get_tech_list(res http.ResponseWriter, req *http.Request) {
 	res.Write(response)
 }
 
-func Post_tech_list(res http.ResponseWriter, req *http.Request) {
+func PostTechList(res http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 
 	var requestData TechData
@@ -77,7 +77,7 @@ func Post_tech_list(res http.ResponseWriter, req *http.Request) {
 }
 
 
-func Put_tech_list(res http.ResponseWriter, req *http.Request) {
+func PutTechList(res http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 
 	var requestData PutTechData
