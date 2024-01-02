@@ -23,7 +23,6 @@ type KakaoUser struct {
 // I_Login 인터페이스 메서드
 func (k *KakaoUser) Login(res http.ResponseWriter, req *http.Request) {
 	// OAuth 로그인을 위한 Redirect URL 생성
-	fmt.Println("이건 ? 오긴 하나?")
 	URL, err := getRedirectURL()
 	if err != nil {
 		log.Println(err)
@@ -49,8 +48,6 @@ func (k *KakaoUser)GetUserInfo(res http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 	}
-	fmt.Println(kakaoUser.User_id)
-	fmt.Println(kakaoUser.User_id)
 	if !isSavedID(kakaoUser.User_id) {
 		query := "INSERT INTO user_info (User_id, Nickname, Profile_img) VALUES (?, ?, ?)"
 		_, err := mysql.DB.Exec(query, kakaoUser.User_id, kakaoUser.Nickname, kakaoUser.Profile_img)
