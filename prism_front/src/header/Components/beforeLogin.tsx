@@ -1,6 +1,5 @@
 import styled from "styled-components";
 
-import axios from "./../../configs/AxiosConfig";
 import loginImg from "./../../assets/kakao_login_small.png";
 
 const BeforeLogin: React.FC = () => {

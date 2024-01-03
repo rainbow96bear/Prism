@@ -12,19 +12,19 @@ const TechItem: FC<TechItemProps> = ({ tech, level, maxLevel }) => {
     <Container>
       <Title>{tech}</Title>
       <LevelBar>
-        {Array.from({ length: maxLevel }, (_, index) => (
-          <LevelBlock key={index} filled={index < level} />
-        ))}
+        {Array.from({ length: maxLevel }, (_, index) =>
+          index < level ? (
+            <LevelFillBlock key={index} />
+          ) : (
+            <LevelEmptyBlock key={index} />
+          )
+        )}
       </LevelBar>
     </Container>
   );
 };
 
 export default TechItem;
-
-interface LevelBlockProps {
-  filled: boolean;
-}
 
 const Container = styled.div`
   display: flex;
@@ -45,11 +45,18 @@ const LevelBar = styled.div`
   display: flex;
 `;
 
-const LevelBlock = styled.div<LevelBlockProps>`
+const LevelEmptyBlock = styled.div`
   width: 20px;
   height: 20px;
-  background-color: ${(props) =>
-    props.filled ? "hsl(999, 70%, 50%)" : "transparent"};
+  background-color: transparent;
+  border: 2px solid hsl(999, 70%, 50%);
+  margin-right: 5px;
+`;
+
+const LevelFillBlock = styled.div`
+  width: 20px;
+  height: 20px;
+  background-color: hsl(999, 70%, 50%);
   border: 2px solid hsl(999, 70%, 50%);
   margin-right: 5px;
 `;
