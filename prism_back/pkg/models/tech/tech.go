@@ -13,9 +13,9 @@ import (
 )
 
 type TechData struct {
-	TechCode string `json:"Tech_code"`
-	TechName string `json:"Tech_name"`
-	Count int `json:"Count"`
+	TechCode string `json:"tech_code"`
+	TechName string `json:"tech_name"`
+	Count int `json:"count"`
 }
 
 type PutTechData struct {

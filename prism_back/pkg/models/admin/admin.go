@@ -15,8 +15,8 @@ import (
 
 type Admin struct {
 	User_id 	string	`json:"id"`
-	Rank 		int	 	`json:"nickname,omitempty"`
-	Password 	string	`json:"picture,omitempty"`
+	Rank 		int	 	`json:"rank,omitempty"`
+	Password 	string	`json:"password,omitempty"`
 }
 
 // 현재 사용자가 관리자 계정인지 확인
@@ -30,7 +30,7 @@ func (a *Admin)CheckRightAdmin(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// 세션으로부터 사용자 정보 확인
-	user_id, err := getUserIDFromSession(res, req)
+	user_id, err := session.GetUserID(req)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
@@ -70,7 +70,7 @@ func (a *Admin)CheckRightAdmin(res http.ResponseWriter, req *http.Request) {
 func (a *Admin)Login(res http.ResponseWriter, req *http.Request){
 
 	// 세션으로부터 사용자 정보 확인
-	user_id, err := getUserIDFromSession(res, req)
+	user_id, err := session.GetUserID(req)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
@@ -123,20 +123,6 @@ func (a *Admin)Login(res http.ResponseWriter, req *http.Request){
 func (a *Admin)Logout(res http.ResponseWriter, req *http.Request){
 	adminLogout(res, req)
 }
-
-// 세션으로 사용자 정보 확인
-func getUserIDFromSession(res http.ResponseWriter, req *http.Request) (user_id string, err error) {
-	session, err := session.Store.Get(req, "user_login")
-	if err != nil {
-		return "", fmt.Errorf("user_login 세션 조회 실패 : %e", err)
-	}
-	user_id, ok := session.Values["User_ID"].(string)
-	if !ok {
-		user_id = ""
-	}
-	return user_id, nil
-}
-
 
 // 세션으로 관리자 정보 확인
 func getAdimUserInfoFromSession(res http.ResponseWriter, req *http.Request) (admin_info Admin, err error) {

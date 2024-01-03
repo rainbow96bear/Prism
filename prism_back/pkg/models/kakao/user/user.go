@@ -20,18 +20,6 @@ type KakaoUser struct {
 	Profile_img string `json:"picture,omitempty"`
 }
 
-// I_Login 인터페이스 메서드
-func (k *KakaoUser) Login(res http.ResponseWriter, req *http.Request) {
-	// OAuth 로그인을 위한 Redirect URL 생성
-	URL, err := getRedirectURL()
-	if err != nil {
-		log.Println(err)
-		http.Error(res, err.Error(), http.StatusInternalServerError)
-	}
-	// Redirect URL로 이동
-	http.Redirect(res, req, URL, http.StatusFound)
-}
-
 // OAuth의 Redirect URL에 대한 처리
 func (k *KakaoUser)GetUserInfo(res http.ResponseWriter, req *http.Request) {
 	kakao_Token := &token.Token{}
@@ -54,6 +42,10 @@ func (k *KakaoUser)GetUserInfo(res http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			log.Println("사용자 정보 저장 실패 : ", err)
 		}
+		_, err = mysql.DB.Exec("INSERT INTO profile (user_info_User_id) VALUES (?)", kakaoUser.User_id)
+		if err != nil {
+			log.Println("프로필 정보 저장 실패 : ", err)
+		}
 	}
 	// kakaoUser 정보로 session 만들기
 	err = createSession(kakaoUser, res, req)
@@ -61,7 +53,7 @@ func (k *KakaoUser)GetUserInfo(res http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 	}
-	http.Redirect(res, req, fmt.Sprintf("%s/home", os.Getenv("DOMAIN")), http.StatusFound)
+	http.Redirect(res, req, fmt.Sprintf("%s/home", os.Getenv("FRONT_DOMAIN")), http.StatusFound)
 }
 
 func (k *KakaoUser)Logout(res http.ResponseWriter, req *http.Request) {
@@ -70,17 +62,6 @@ func (k *KakaoUser)Logout(res http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 	}
-}
-
-// OAuth 로그인을 위할 Redirection
-func getRedirectURL() (redirect_uri string, err error) {
-	REST_API_KEY := os.Getenv("REST_API_KEY")
-	REDIRECT_URI := os.Getenv("REDIRECT_URI")
-	redirectURL := fmt.Sprintf("https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s",
-	REST_API_KEY, REDIRECT_URI)
-	
-	// redirectURL로 redirect
-	return redirectURL, nil
 }
 
 // User 정보 가져오기

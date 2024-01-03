@@ -31,7 +31,7 @@ func main() {
 	)	
 	
 	r.Use(corsMiddleware)
-	root.RegisterHandlers(r.PathPrefix("").Subrouter())
+	root.RegisterHandlers(r.PathPrefix("/api").Subrouter())
 
 	log.Println("Prism Server Starting on Port :", port)
 	// 라우터에 CORS 미들웨어 추가
