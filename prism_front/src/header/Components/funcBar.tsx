@@ -1,45 +1,28 @@
 import styled from "styled-components";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 
 import BeforeLogin from "./beforeLogin";
 import AfterLogin from "./afterLogin";
-import axios from "./../../configs/AxiosConfig";
-
-interface UserInfo {
-  userID: string;
-  imgUrl: string;
-}
+import { AppDispatch, RootState } from "../../app/store";
+import { fetchUser } from "../../app/slices/user/user";
 
 const FuncBar: React.FC = () => {
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-
-  const getUserInfo = async () => {
-    try {
-      const result = await axios.get("/userInfo/light_info", {
-        withCredentials: true,
-      });
-
-      const { sub, picture } = result.data;
-      setUserInfo({ userID: sub, imgUrl: picture });
-    } catch (error) {
-      console.error("Error fetching user info:", error);
-    }
-  };
+  const dispatch = useDispatch<AppDispatch>();
+  const userInfo = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
-    const User_Login = document.cookie;
-    const hasCookie = User_Login.includes("user_login");
-    if (hasCookie) {
-      getUserInfo();
-    } else {
-      setUserInfo(null);
+    const userLoginCookie = document.cookie.includes("user_login");
+    if (userLoginCookie) {
+      // fetchUserInfo 액션 디스패치
+      dispatch(fetchUser());
     }
-  }, []);
+  }, [dispatch]);
 
   return (
     <Box>
-      {userInfo != null ? (
-        <AfterLogin userID={userInfo?.userID} imgUrl={userInfo?.imgUrl} />
+      {userInfo.user_id != "" ? (
+        <AfterLogin userID={userInfo.user_id} imgUrl={userInfo.profile_img} />
       ) : (
         <BeforeLogin />
       )}

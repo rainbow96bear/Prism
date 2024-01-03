@@ -3,10 +3,12 @@ import { FaRegBell } from "react-icons/fa";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { FaRegEdit } from "react-icons/fa";
 import { useState } from "react";
-import axios from "./../../configs/AxiosConfig";
+import { useDispatch, useSelector } from "react-redux";
 
 import DropDown from "../../CustomComponent/DropDown";
 import { TitlePath } from "../../GlobalType/TitlePath";
+import { AppDispatch, RootState } from "../../app/store";
+import { logout } from "../../app/slices/user/user";
 
 interface AfterLoginProps {
   userID?: string;
@@ -14,24 +16,16 @@ interface AfterLoginProps {
 }
 
 const AfterLogin: React.FC<AfterLoginProps> = ({ userID, imgUrl }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const userInfo = useSelector((state: RootState) => state.user);
+
   const [dropdown, setDropdown] = useState(false);
-  const logout = async () => {
-    try {
-      await axios.post("/OAuth/kakao/logout", {
-        withCredentials: true,
-      });
-      const User_Login = document.cookie;
-      const hasCookie = User_Login.includes("user_login");
-      if (!hasCookie) {
-        window.location.href = "http://localhost:3000";
-      }
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
+  const logoutFunc = () => {
+    dispatch(logout());
   };
   const DropDown_List: TitlePath[] = [
     { title: "프로필", path: `/profile/${userID}` },
-    { title: "로그아웃", func: logout },
+    { title: "로그아웃", func: logoutFunc },
   ];
   return (
     <>

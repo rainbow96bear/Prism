@@ -1,39 +1,40 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import styled from "styled-components";
-import axios from "./../../../../configs/AxiosConfig";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../app/store";
+import { getPersonalDate } from "../../../../app/slices/profile/personal_data";
 
 const UserInfo = () => {
-  const [imgSrc, setImgSrc] = useState("");
-  const [nickName, setNickName] = useState("");
-  const { id } = useParams();
-  const [isUser, setIsUser] = useState(false);
-
+  const dispatch = useDispatch<AppDispatch>();
+  const personalDate = useSelector((state: RootState) => state.personal_data);
+  const user = useSelector((state: RootState) => state.user);
   const navigator = useNavigate();
 
   const move = (path: string) => {
     navigator(path);
   };
-
-  // cookie에서 Id를 가져오던 방법에서 Profile을 정보를 받아올 때 true false 지정하여 응답 받기
-
+  const { id } = useParams();
   useEffect(() => {
-    const getProfile = async () => {
-      // const result = await axios.get(`http://localhost:8000/user/profile?id=${id}`);
-    };
-    getProfile();
-  }, [id]);
+    dispatch(getPersonalDate(id));
+  }, []);
 
   return (
     <Container>
-      <img src={imgSrc} alt="User Profile" />
+      <img src={personalDate.profile_img} alt="User Profile" />
       <SubBox>
-        <div className="nickname">{nickName}</div>
-        <div className="oneLineIntroduce">한 줄 소개</div>
-        <div className="hashtag">hashtag</div>
+        <div className="nickname">{personalDate.nickname}</div>
+        <div className="oneLineIntroduce">
+          {personalDate.one_line_introduce}
+        </div>
+        {personalDate.hashtag.map((value, index) => (
+          <div className="hashtag" key={index}>
+            {value}
+          </div>
+        ))}
       </SubBox>
       <div>
-        {isUser ? (
+        {user.user_id == id ? (
           <button
             onClick={() => {
               move("/profile/update/" + id);
