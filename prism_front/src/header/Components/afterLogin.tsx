@@ -17,7 +17,6 @@ interface AfterLoginProps {
 
 const AfterLogin: React.FC<AfterLoginProps> = ({ userID, imgUrl }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const userInfo = useSelector((state: RootState) => state.user);
 
   const [dropdown, setDropdown] = useState(false);
   const logoutFunc = () => {

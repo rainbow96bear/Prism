@@ -2,6 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
+
 import { AppDispatch, RootState } from "../../../../app/store";
 import { getPersonalDate } from "../../../../app/slices/profile/personal_data";
 
@@ -37,7 +38,7 @@ const UserInfo = () => {
         {user.user_id == id ? (
           <button
             onClick={() => {
-              move("/profile/update/" + id);
+              move("/profile/update/userinfo");
             }}>
             수정
           </button>
