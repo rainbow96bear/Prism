@@ -7,7 +7,8 @@ import (
 	"log"
 	"net/http"
 	"prism_back/internal/Database/mysql"
-	"prism_back/internal/session"
+
+	"github.com/gorilla/mux"
 )
 
 type PersonalData struct {
@@ -17,7 +18,9 @@ type PersonalData struct {
 	HashTag []string `json:"hashtag,omitempty"`
 }
 func (p *PersonalData)GetPersonalData(res http.ResponseWriter, req *http.Request) {
-	personaldata, err := getPersonalData(res, req)
+	vars := mux.Vars(req)
+	id := vars["id"]
+	personaldata, err := getPersonalData(id)
 	if err != nil {
 		http.Error(res, "Missing 'id' parameter", http.StatusBadRequest)
 	}
@@ -29,18 +32,29 @@ func (p *PersonalData)GetPersonalData(res http.ResponseWriter, req *http.Request
 	res.Write(jsonResponse)
 }
 
-func (p *PersonalData)SetPersonalData(res http.ResponseWriter, req *http.Request) {
-	// personalData, err := getPersonalDataFromReq(res, req)
-	// if err != nil {
-	// 	http.Error(res, "Missing 'id' parameter", http.StatusBadRequest)
-	// }
+func (p *PersonalData) SetPersonalData(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	id := vars["id"]
+	personalData, err := getPersonalDataFromReq(res, req)
+	if err != nil {
+		http.Error(res, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// 현재 DB에 저장된 사용자 정보 가져오기
+	currentData, err := getPersonalData(id)
+	fmt.Println("변경 전 정보",currentData)
+	if err != nil {
+		http.Error(res, "Failed to retrieve current user data", http.StatusInternalServerError)
+		return
+	}
+	setPersonalDataToDB(personalData, currentData, id)
+	// 변경된 값에 대해서만 업데이트
 }
 
-func getPersonalData(res http.ResponseWriter, req *http.Request) (PersonalData, error) {
-	queryValues := req.URL.Query()
 
+func getPersonalData(id string) (PersonalData, error) {
 	// "id" 쿼리 매개변수 값 얻기
-	id := queryValues.Get("id")
 	// id 값이 빈 문자열인 경우에 대한 처리
 
 	var personaldata PersonalData
@@ -72,28 +86,36 @@ func getPersonalDataFromReq(res http.ResponseWriter, req *http.Request) (Persona
 	return personalData, nil
 }
 
-func SetPersonalDataToDB(personalData PersonalData, req *http.Request) error {
-    id, err := session.GetUserID(req)
-    if err != nil {
-        log.Println("id 조회 실패", err)
-        return err
-    }
-
-    // profile 테이블 업데이트
-    profileQuery := `UPDATE profile SET One_line_introduce = ? WHERE user_info_User_id = ?`
-    _, err = mysql.DB.Exec(profileQuery, personalData.One_line_introduce, id)
-    if err != nil {
-        log.Println("한 줄 소개 업데이트 실패: ", err)
-        return err
-    }
-
-    // user_info 테이블 업데이트
-    userInfoQuery := `UPDATE user_info SET Nickname = ?, Profile_img = ? WHERE User_id = ?`
-    _, err = mysql.DB.Exec(userInfoQuery, personalData.Nickname, personalData.Profile_img, id)
-    if err != nil {
-        log.Println("닉네임 및 프로필 이미지 업데이트 실패: ", err)
-        return err
-    }
-
+func setPersonalDataToDB(personalData, currentData PersonalData, id string) error {
+	// 닉네임이 변경 된 경우
+	if personalData.Nickname != "" && personalData.Nickname != currentData.Nickname {
+		userInfoQuery := `UPDATE user_info SET Nickname = ? WHERE User_id = ?`
+		_, err := mysql.DB.Exec(userInfoQuery, personalData.Nickname, id)
+		if err != nil {
+			log.Println("닉네임 업데이트 실패: ", err)
+			return err
+		}
+	}
+	// 프로필 사진이 변경된 경우
+	fmt.Println(personalData.Profile_img)
+	fmt.Println(currentData.Profile_img)
+	if personalData.Profile_img != "" && personalData.Profile_img != currentData.Profile_img {
+		userInfoQuery := `UPDATE user_info SET, Profile_img = ? WHERE User_id = ?`
+		_, err := mysql.DB.Exec(userInfoQuery, personalData.Profile_img, id)
+		if err != nil {
+			log.Println("프로필 이미지 업데이트 실패: ", err)
+			return err
+		}
+	}
+	// 한 줄 소개가 변경된 경우
+	if personalData.One_line_introduce != "" && personalData.One_line_introduce != currentData.One_line_introduce {
+		profileQuery := `UPDATE profile SET One_line_introduce = ? WHERE user_info_User_id = ?`
+		_, err := mysql.DB.Exec(profileQuery, personalData.One_line_introduce, id)
+		if err != nil {
+			log.Println("한 줄 소개 업데이트 실패: ", err)
+			return err
+		}
+	}
+	
     return nil
 }

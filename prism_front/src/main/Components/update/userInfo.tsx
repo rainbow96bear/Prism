@@ -21,6 +21,7 @@ const UserInfo = () => {
     personalDate.one_line_introduce
   );
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(getPersonalDate(user.user_id));
@@ -51,6 +52,7 @@ const UserInfo = () => {
       reader.readAsDataURL(file);
     }
   };
+
   const handleHashTagRemove = (index: number) => {
     setHashTag((prevHashTag) => {
       const newHashTag = [...prevHashTag];
@@ -61,25 +63,78 @@ const UserInfo = () => {
 
   const saveChangedUserInfo = async () => {
     try {
-      const userData = {
-        nickname: nickname,
-        one_line_introduce: one_line_introduce,
-        profile_img: uploadedImage || personalDate.profile_img,
+      // 이미지 업로드 요청
+      const imageFormData = new FormData();
+      if (uploadedImage) {
+        const imageFile = dataURItoBlob(uploadedImage);
+        imageFormData.append("file", imageFile, "profile_image.png");
+
+        const imageResponse = await axios.post(
+          "/profile/upload/image",
+          imageFormData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            withCredentials: true,
+          }
+        );
+        console.log(imageResponse.data.imagePath);
+        if (imageResponse.status === 200) {
+          // 이미지 경로를 응답받은 경우에만 변경된 이미지 경로를 설정
+          setImage(imageResponse.data.imagePath);
+        }
+      }
+
+      // 프로필 정보 업데이트 요청
+      const changedData = {
+        nickname: nickname !== personalDate.nickname ? nickname : undefined,
+        one_line_introduce:
+          one_line_introduce !== personalDate.one_line_introduce
+            ? one_line_introduce
+            : undefined,
+        profile_img: image !== personalDate.profile_img ? image : undefined,
         hashtag: hashTag,
       };
 
-      const response = await axios.post("/api/user/update", userData);
+      // 변경된 값이 undefined인 경우 해당 프로퍼티 제거
+      const userData = Object.fromEntries(
+        Object.entries(changedData).filter(([_, value]) => value !== undefined)
+      );
+
+      const response = await axios.post(
+        `/profile/update/${user.user_id}`,
+        userData,
+        {
+          withCredentials: true,
+        }
+      );
 
       if (response.status === 200) {
-        console.log("User information updated successfully!");
+        console.log("사용자 정보가 성공적으로 업데이트되었습니다!");
         navigator(`/profile/${user.user_id}`);
       } else {
-        console.error("Failed to update user information");
+        console.error("사용자 정보 업데이트에 실패했습니다");
       }
     } catch (error) {
-      console.error("Error during Axios request:", error);
+      console.error("Axios 요청 중 오류 발생:", error);
     }
   };
+
+  // Data URI를 Blob 객체로 변환
+  const dataURItoBlob = (dataURI: string) => {
+    const byteString = atob(dataURI.split(",")[1]);
+    const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ab], { type: mimeString });
+  };
+
   return (
     <Container>
       <InputBox>

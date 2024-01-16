@@ -21,7 +21,7 @@ export const getPersonalDate = createAsyncThunk<
   string | undefined
 >("personal_data", async (id) => {
   const response = await axios.get<PersonalData>(
-    `/profile/personaldata?id=${id}`,
+    `/profile/personaldata/${id}`,
     {
       withCredentials: true,
     }
