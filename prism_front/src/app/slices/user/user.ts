@@ -4,13 +4,11 @@ import axios from "../../../configs/AxiosConfig";
 interface User {
   user_id: string;
   nickname: string;
-  profile_img: string;
 }
 
 const initialState: User = {
   user_id: "",
   nickname: "",
-  profile_img: "",
 };
 
 // 비동기 작업을 처리하는 thunk 생성
@@ -42,19 +40,16 @@ const userSlice = createSlice({
         // 비동기 작업이 성공하면 상태를 업데이트
         state.user_id = action.payload.user_id;
         state.nickname = action.payload.nickname;
-        state.profile_img = action.payload.profile_img;
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.user_id = "";
         state.nickname = "";
-        state.profile_img = "";
         console.error("Error fetching user info:", action.error.message);
       })
       .addCase(logout.fulfilled, (state) => {
         // 로그아웃이 성공하면 상태를 초기화
         state.user_id = "";
         state.nickname = "";
-        state.profile_img = "";
       })
       .addCase(logout.rejected, (state, action) => {
         console.error("Logout failed:", action.error.message);

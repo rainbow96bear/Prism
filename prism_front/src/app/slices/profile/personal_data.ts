@@ -3,16 +3,13 @@ import axios from "../../../configs/AxiosConfig";
 
 interface PersonalData {
   nickname: string;
-  profile_img: string;
   one_line_introduce: string;
   hashtag: string[];
 }
 
 const initialState: PersonalData = {
   nickname: "",
-  profile_img:
-    process.env.REACT_APP_BASE_URL + "/assets/base_profile.jpeg" || "",
-  one_line_introduce: "한 줄 소개",
+  one_line_introduce: "",
   hashtag: ["golang"],
 };
 
@@ -37,9 +34,7 @@ const personalDateSlice = createSlice({
     builder
       .addCase(getPersonalDate.fulfilled, (state, action) => {
         state.nickname = action.payload.nickname;
-        state.profile_img = action.payload.profile_img;
         state.one_line_introduce = action.payload.one_line_introduce;
-        // state.hashtag = action.payload.hashtag;
       })
       .addCase(getPersonalDate.rejected, (state, action) => {
         console.error("Error fetching user info:", action.error.message);

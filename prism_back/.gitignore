@@ -1,2 +1,5 @@
 .env
 cmd.exe
+
+assets/*
+!assets/default.jpg

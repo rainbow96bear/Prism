@@ -13,7 +13,6 @@ import (
 
 type PersonalData struct {
 	Nickname string	`json:"nickname"`
-	Profile_img string `json:"profile_img,omitempty"`
 	One_line_introduce string `json:"one_line_introduce,omitempty"`
 	HashTag []string `json:"hashtag,omitempty"`
 }
@@ -59,12 +58,12 @@ func getPersonalData(id string) (PersonalData, error) {
 
 	var personaldata PersonalData
 	query := `
-    SELECT user_info.Nickname, user_info.Profile_img, profile.One_line_introduce
+    SELECT user_info.Nickname, profile.One_line_introduce
     FROM profile
     JOIN user_info ON profile.user_info_User_id = user_info.User_id
 	WHERE profile.user_info_User_id = ?
 `
-	err := mysql.DB.QueryRow(query, id).Scan(&personaldata.Nickname, &personaldata.Profile_img, &personaldata.One_line_introduce)
+	err := mysql.DB.QueryRow(query, id).Scan(&personaldata.Nickname, &personaldata.One_line_introduce)
 	if err != nil {
 		log.Println(err)
 	}
@@ -93,17 +92,6 @@ func setPersonalDataToDB(personalData, currentData PersonalData, id string) erro
 		_, err := mysql.DB.Exec(userInfoQuery, personalData.Nickname, id)
 		if err != nil {
 			log.Println("닉네임 업데이트 실패: ", err)
-			return err
-		}
-	}
-	// 프로필 사진이 변경된 경우
-	fmt.Println(personalData.Profile_img)
-	fmt.Println(currentData.Profile_img)
-	if personalData.Profile_img != "" && personalData.Profile_img != currentData.Profile_img {
-		userInfoQuery := `UPDATE user_info SET, Profile_img = ? WHERE User_id = ?`
-		_, err := mysql.DB.Exec(userInfoQuery, personalData.Profile_img, id)
-		if err != nil {
-			log.Println("프로필 이미지 업데이트 실패: ", err)
 			return err
 		}
 	}

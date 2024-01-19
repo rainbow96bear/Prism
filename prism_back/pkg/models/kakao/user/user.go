@@ -11,6 +11,7 @@ import (
 	"prism_back/internal/Database/mysql"
 	"prism_back/internal/session"
 	"prism_back/pkg/interface/basetoken"
+	"prism_back/pkg/models/images"
 	"prism_back/pkg/models/kakao/token"
 )
 
@@ -37,8 +38,13 @@ func (k *KakaoUser)GetUserInfo(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 	}
 	if !isSavedID(kakaoUser.User_id) {
-		query := "INSERT INTO user_info (User_id, Nickname, Profile_img) VALUES (?, ?, ?)"
-		_, err := mysql.DB.Exec(query, kakaoUser.User_id, kakaoUser.Nickname, kakaoUser.Profile_img)
+		// , kakaoUser.Profile_img
+		images.DownloadImageFromKakao(kakaoUser.Profile_img, kakaoUser.User_id)
+		if err != nil {
+			log.Println("프로필 이미지 저장 실패 : ", err)
+		}
+		query := "INSERT INTO user_info (User_id, Nickname) VALUES (?, ?)"
+		_, err := mysql.DB.Exec(query, kakaoUser.User_id, kakaoUser.Nickname)
 		if err != nil {
 			log.Println("사용자 정보 저장 실패 : ", err)
 		}
@@ -106,7 +112,9 @@ func createSession(user KakaoUser, res http.ResponseWriter, req *http.Request) (
 		return fmt.Errorf("세션을 가져오는데 문제 발생 : %e", err)
 	}
 	session.Values["User_ID"] = user.User_id
-	session.Values["User_ProfileImg"] = user.Profile_img
+	// session.Values["User_ProfileImg"] = user.Profile_img
+	session.Values["User_ProfileImg"] = fmt.Sprintf("%s%s%s", os.Getenv("BACK_DOMAIN"), "/assets/profile", user.User_id)
+	fmt.Println(session.Values["User_ProfileImg"])
 	err = session.Save(req, res)
 
 	if err != nil {

@@ -8,13 +8,14 @@ import { getPersonalDate } from "../../../app/slices/profile/personal_data";
 import { useNavigate } from "react-router-dom";
 import HashTagItem from "./Component/hashtagItem";
 import HashTagInput from "./Component/hashtagInput";
+import ProfileImage from "../../../CustomComponent/ProfileImg";
+import { fetchUser } from "../../../app/slices/user/user";
 
 const UserInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user);
   const personalDate = useSelector((state: RootState) => state.personal_data);
   const navigator = useNavigate();
-
   const [nickname, setNickname] = useState(personalDate.nickname);
   const [hashTag, setHashTag] = useState(personalDate.hashtag);
   const [one_line_introduce, setOneLineIntroduce] = useState(
@@ -24,8 +25,16 @@ const UserInfo = () => {
   const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
-    dispatch(getPersonalDate(user.user_id));
-  }, []);
+    // user_id가 존재할 때만 사용자 정보를 가져오도록 함
+    if (user.user_id) {
+      dispatch(getPersonalDate(user.user_id));
+    }
+  }, [dispatch, user.user_id]);
+
+  useEffect(() => {
+    // 컴포넌트가 처음 마운트될 때에만 사용자 정보를 가져오도록 함
+    dispatch(fetchUser());
+  }, [dispatch]);
 
   const handleNicknameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNickname(event.target.value);
@@ -93,7 +102,6 @@ const UserInfo = () => {
           one_line_introduce !== personalDate.one_line_introduce
             ? one_line_introduce
             : undefined,
-        profile_img: image !== personalDate.profile_img ? image : undefined,
         hashtag: hashTag,
       };
 
@@ -134,16 +142,17 @@ const UserInfo = () => {
 
     return new Blob([ab], { type: mimeString });
   };
-
   return (
     <Container>
       <InputBox>
-        <img
-          src={uploadedImage || personalDate.profile_img}
-          alt="User Profile"
-          onClick={handleImageClick}
-          style={{ cursor: "pointer" }}
-        />
+        <ImageBox onClick={handleImageClick} style={{ cursor: "pointer" }}>
+          {uploadedImage != null ? (
+            <img src={uploadedImage} alt="User Profile" />
+          ) : (
+            <ProfileImage
+              id={user.user_id != "" ? user.user_id : "default"}></ProfileImage>
+          )}
+        </ImageBox>
         <input
           id="imageInput"
           type="file"
@@ -153,13 +162,17 @@ const UserInfo = () => {
         />
         <input
           type="text"
-          value={nickname}
+          value={nickname != "" ? nickname : personalDate.nickname}
           onChange={handleNicknameChange}
           placeholder="닉네임"
         />
         <input
           type="text"
-          value={one_line_introduce}
+          value={
+            one_line_introduce != ""
+              ? one_line_introduce
+              : personalDate.one_line_introduce
+          }
           onChange={handleIntroduceChange}
           placeholder="한 줄 소개"
         />
@@ -233,5 +246,25 @@ const FuncBox = styled.div`
     margin: 10px;
     cursor: pointer;
     padding: 10px;
+  }
+`;
+
+const ImageBox = styled.div`
+  width: 50%;
+  position: relative;
+
+  &:before {
+    content: "";
+    display: block;
+    padding-bottom: 100%; // 1:1 비율을 위한 값
+  }
+
+  > img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; // 이미지가 비율을 유지하며 박스를 채우도록 함
   }
 `;

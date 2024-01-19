@@ -9,13 +9,13 @@ import DropDown from "../../CustomComponent/DropDown";
 import { TitlePath } from "../../GlobalType/TitlePath";
 import { AppDispatch, RootState } from "../../app/store";
 import { logout } from "../../app/slices/user/user";
+import ProfileImage from "../../CustomComponent/ProfileImg";
 
 interface AfterLoginProps {
   userID?: string;
-  imgUrl?: string;
 }
 
-const AfterLogin: React.FC<AfterLoginProps> = ({ userID, imgUrl }) => {
+const AfterLogin: React.FC<AfterLoginProps> = ({ userID }) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const [dropdown, setDropdown] = useState(false);
@@ -38,11 +38,8 @@ const AfterLogin: React.FC<AfterLoginProps> = ({ userID, imgUrl }) => {
         <FaRegEdit size={"100%"} />
       </ButtonBox>
       <ButtonBox>
-        <ProfileImg
-          onClick={() => setDropdown(!dropdown)}
-          src={imgUrl}
-          alt="User Profile"
-        />
+        <ProfileImage
+          id={userID != undefined ? userID : "default"}></ProfileImage>
 
         {dropdown ? (
           <S_DropDown onClick={() => setDropdown(!dropdown)}>
@@ -63,10 +60,6 @@ const ButtonBox = styled.div`
   height: 50%;
   margin: 0px 10px;
   cursor: pointer;
-`;
-
-const ProfileImg = styled.img`
-  height: 100%;
 `;
 
 const S_DropDown = styled.div`

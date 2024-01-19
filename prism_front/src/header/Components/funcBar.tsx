@@ -22,7 +22,7 @@ const FuncBar: React.FC = () => {
   return (
     <Box>
       {userInfo.user_id != "" ? (
-        <AfterLogin userID={userInfo.user_id} imgUrl={userInfo.profile_img} />
+        <AfterLogin userID={userInfo.user_id} />
       ) : (
         <BeforeLogin />
       )}

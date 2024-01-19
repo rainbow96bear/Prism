@@ -10,17 +10,28 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-)
-type Image struct {
 
-}
-func (i *Image) UploadImageHandler(res http.ResponseWriter, req *http.Request){
-	fmt.Println("요청")
-	upload(res, req)
-	fmt.Println("요청 끝")
-}
+	"github.com/gorilla/mux"
+)
+
 // 업로드된 이미지를 저장할 폴더의 경로를 지정합니다.
-const uploadFolder = "../assets/profile"
+var imageFolder = fmt.Sprintf("%s%s",  os.Getenv("RELATIVE_IMAGE_DIRECTORY"), "/profiles/")
+
+func DownloadImageFromKakao(url, id string) error {
+	err := downloadImage(url, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UploadImageHandler(res http.ResponseWriter, req *http.Request){
+	upload(res, req)
+}
+
+func GetImageHandler(res http.ResponseWriter, req *http.Request){
+	getImageHandler(res, req)
+}
 
 func upload(res http.ResponseWriter, req *http.Request) {
 	// 폼 데이터에서 파일 가져오기
@@ -36,7 +47,7 @@ func upload(res http.ResponseWriter, req *http.Request) {
 	fileName := fmt.Sprintf("%d_%s", timestamp, getFileName(file))
 
 	// 파일을 업로드할 경로 생성
-	filePath := filepath.Join(uploadFolder, fileName)
+	filePath := filepath.Join(imageFolder, fileName, ".jpg")
 	fmt.Println(filePath)
 	// 파일 생성
 	newFile, err := os.Create(filePath)
@@ -85,4 +96,49 @@ func getFileName(file multipart.File) string {
 
 	// 새로운 파일명 생성 (예: timestamp + 확장자)
 	return fmt.Sprintf("%d%s", time.Now().UnixNano(), extension)
+}
+
+func downloadImage(url, id string) error {
+	// HTTP GET 요청을 보냅니다.
+	response, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	// HTTP 응답이 성공적인지 확인합니다.
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("HTTP 요청이 실패했습니다. 상태 코드: %d", response.StatusCode)
+	}
+
+	extension := ".jpg"
+	
+	// 로컬 파일을 생성합니다. 파일 이름에 id 값을 포함합니다.
+	fileName := fmt.Sprintf("%s%s", id, extension)
+	ilePath := filepath.Join(imageFolder, fileName)
+	file, err := os.Create(ilePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// 이미지 데이터를 로컬 파일에 복사합니다.
+	_, err = io.Copy(file, response.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("이미지 다운로드가 완료되었습니다. 파일 경로: %s\n", fileName)
+	return nil
+}
+
+func getImageHandler(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	id := vars["id"]
+
+	// 이미지 파일의 실제 경로를 생성
+	filePath := "../assets/profile/" + id + ".jpg"
+	fmt.Println(id)
+	// 이미지 파일 서빙
+	http.ServeFile(res, req, filePath)
 }

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { AppDispatch, RootState } from "../../../../app/store";
 import { getPersonalDate } from "../../../../app/slices/profile/personal_data";
+import ProfileImage from "../../../../CustomComponent/ProfileImg";
 
 const UserInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -22,7 +23,7 @@ const UserInfo = () => {
 
   return (
     <Container>
-      <img src={personalDate.profile_img} alt="User Profile" />
+      <ProfileImage id={id != undefined ? id : "default"}></ProfileImage>
       <SubBox>
         <div className="nickname">{personalDate.nickname}</div>
         <div className="oneLineIntroduce">
