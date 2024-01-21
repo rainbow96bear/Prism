@@ -10,6 +10,7 @@ import { TitlePath } from "../../GlobalType/TitlePath";
 import { AppDispatch, RootState } from "../../app/store";
 import { logout } from "../../app/slices/user/user";
 import ProfileImage from "../../CustomComponent/ProfileImg";
+import { useNavigate } from "react-router-dom";
 
 interface AfterLoginProps {
   userID?: string;
@@ -17,10 +18,12 @@ interface AfterLoginProps {
 
 const AfterLogin: React.FC<AfterLoginProps> = ({ userID }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigator = useNavigate();
 
   const [dropdown, setDropdown] = useState(false);
   const logoutFunc = () => {
     dispatch(logout());
+    navigator("/");
   };
   const DropDown_List: TitlePath[] = [
     { title: "프로필", path: `/profile/${userID}` },
@@ -38,8 +41,10 @@ const AfterLogin: React.FC<AfterLoginProps> = ({ userID }) => {
         <FaRegEdit size={"100%"} />
       </ButtonBox>
       <ButtonBox>
-        <ProfileImage
-          id={userID != undefined ? userID : "default"}></ProfileImage>
+        <ImageBox onClick={() => setDropdown(!dropdown)}>
+          <ProfileImage
+            id={userID != undefined ? userID : "default"}></ProfileImage>
+        </ImageBox>
 
         {dropdown ? (
           <S_DropDown onClick={() => setDropdown(!dropdown)}>
@@ -68,4 +73,8 @@ const S_DropDown = styled.div`
   right: 0px;
   top: 50px;
   margin: 10px 0px;
+`;
+
+const ImageBox = styled.div`
+  height: 100%;
 `;

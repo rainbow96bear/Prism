@@ -5,10 +5,9 @@ interface ComponentProps {
 }
 
 const ProfileImage: React.FC<ComponentProps> = ({ id }) => {
-  return (
-    <ImgBox
-      src={`http://localhost:8080/assets/images/profiles/${id}.jpg`}></ImgBox>
-  );
+  const imageUrl = `http://localhost:8080/assets/images/profiles/${id}.jpg`;
+
+  return <ImgBox src={imageUrl}></ImgBox>;
 };
 
 export default ProfileImage;

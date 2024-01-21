@@ -27,7 +27,6 @@ func (l *Info)GetUserInfo(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(info)
 	// JSON 형식으로 응답
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusOK)

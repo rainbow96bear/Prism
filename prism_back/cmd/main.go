@@ -11,7 +11,6 @@ import (
 	"prism_back/pkg/handlers/root"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -23,12 +22,6 @@ func main() {
 
 	mysql.SetupDB()
 	session.SetupStore()
-	corsMiddleware := handlers.CORS(
-		handlers.AllowedOrigins([]string{os.Getenv("FRONT_DOMAIN")}),
-		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
-		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
-		handlers.AllowCredentials(),
-	)	
 	
 	r.Use(corsMiddleware)
 	root.RegisterHandlers(r.PathPrefix("/api").Subrouter())
@@ -42,3 +35,18 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		res.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONT_DOMAIN"))
+		res.Header().Set("Access-Control-Allow-Credentials", "true")
+		res.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		res.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+
+		if req.Method == "OPTIONS" {
+			res.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(res, req)
+	})
+}

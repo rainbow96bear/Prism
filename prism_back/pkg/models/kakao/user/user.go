@@ -112,9 +112,6 @@ func createSession(user KakaoUser, res http.ResponseWriter, req *http.Request) (
 		return fmt.Errorf("세션을 가져오는데 문제 발생 : %e", err)
 	}
 	session.Values["User_ID"] = user.User_id
-	// session.Values["User_ProfileImg"] = user.Profile_img
-	session.Values["User_ProfileImg"] = fmt.Sprintf("%s%s%s", os.Getenv("BACK_DOMAIN"), "/assets/profile", user.User_id)
-	fmt.Println(session.Values["User_ProfileImg"])
 	err = session.Save(req, res)
 
 	if err != nil {

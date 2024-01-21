@@ -31,7 +31,7 @@ const UserInfo = () => {
         </div>
         {personalDate.hashtag.map((value, index) => (
           <div className="hashtag" key={index}>
-            {value}
+            #{value}
           </div>
         ))}
       </SubBox>

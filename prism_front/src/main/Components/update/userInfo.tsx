@@ -22,7 +22,6 @@ const UserInfo = () => {
     personalDate.one_line_introduce
   );
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
     // user_id가 존재할 때만 사용자 정보를 가져오도록 함
@@ -72,55 +71,32 @@ const UserInfo = () => {
 
   const saveChangedUserInfo = async () => {
     try {
-      // 이미지 업로드 요청
-      const imageFormData = new FormData();
+      const formData = new FormData();
+
+      // Add image file to FormData
       if (uploadedImage) {
         const imageFile = dataURItoBlob(uploadedImage);
-        imageFormData.append("file", imageFile, "profile_image.png");
-
-        const imageResponse = await axios.post(
-          "/profile/upload/image",
-          imageFormData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-            withCredentials: true,
-          }
-        );
-        console.log(imageResponse.data.imagePath);
-        if (imageResponse.status === 200) {
-          // 이미지 경로를 응답받은 경우에만 변경된 이미지 경로를 설정
-          setImage(imageResponse.data.imagePath);
-        }
+        formData.append("file", imageFile, "profile_image.png");
       }
 
-      // 프로필 정보 업데이트 요청
-      const changedData = {
-        nickname: nickname !== personalDate.nickname ? nickname : undefined,
-        one_line_introduce:
-          one_line_introduce !== personalDate.one_line_introduce
-            ? one_line_introduce
-            : undefined,
-        hashtag: hashTag,
-      };
-
-      // 변경된 값이 undefined인 경우 해당 프로퍼티 제거
-      const userData = Object.fromEntries(
-        Object.entries(changedData).filter(([_, value]) => value !== undefined)
-      );
+      // Add other form data
+      formData.append("nickname", nickname);
+      formData.append("one_line_introduce", one_line_introduce);
+      // formData.append("hashtag", hashTag);
 
       const response = await axios.post(
         `/profile/update/${user.user_id}`,
-        userData,
+        formData,
         {
           withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data", // Set content type to multipart/form-data
+          },
         }
       );
 
       if (response.status === 200) {
-        console.log("사용자 정보가 성공적으로 업데이트되었습니다!");
-        navigator(`/profile/${user.user_id}`);
+        window.location.href = `http://localhost:3000/profile/${user.user_id}`;
       } else {
         console.error("사용자 정보 업데이트에 실패했습니다");
       }

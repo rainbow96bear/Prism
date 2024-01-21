@@ -3,10 +3,10 @@ package personaldata
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"prism_back/internal/Database/mysql"
+	"prism_back/pkg/models/images"
 
 	"github.com/gorilla/mux"
 )
@@ -36,17 +36,18 @@ func (p *PersonalData) SetPersonalData(res http.ResponseWriter, req *http.Reques
 	id := vars["id"]
 	personalData, err := getPersonalDataFromReq(res, req)
 	if err != nil {
+		fmt.Printf("%v", err)
 		http.Error(res, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	// 현재 DB에 저장된 사용자 정보 가져오기
 	currentData, err := getPersonalData(id)
-	fmt.Println("변경 전 정보",currentData)
 	if err != nil {
 		http.Error(res, "Failed to retrieve current user data", http.StatusInternalServerError)
 		return
 	}
+	images.UploadImageHandler(res, req)
 	setPersonalDataToDB(personalData, currentData, id)
 	// 변경된 값에 대해서만 업데이트
 }
@@ -71,19 +72,24 @@ func getPersonalData(id string) (PersonalData, error) {
 }
 
 func getPersonalDataFromReq(res http.ResponseWriter, req *http.Request) (PersonalData, error) {
-	
-	body, err := io.ReadAll(req.Body)
+	// 폼 데이터에서 nickname과 one_line_introduce 가져오기
+	err := req.ParseMultipartForm(10 << 20) // 10MB 제한으로 폼 데이터 파싱
 	if err != nil {
-		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
-		return PersonalData{}, fmt.Errorf("요청의 Body 읽기 오류 : %e", err)
+		return PersonalData{}, fmt.Errorf("폼 데이터 파싱 오류: %e", err)
 	}
-	var personalData PersonalData
-	err = json.Unmarshal(body, &personalData)
-	if err != nil {
-		return PersonalData{}, fmt.Errorf("JSON 파싱 오류 : %e", err)
+
+	nickname := req.FormValue("nickname")
+	oneLineIntroduce := req.FormValue("one_line_introduce")
+
+	// 필요한 정보만 담아서 PersonalData 생성
+	personalData := PersonalData{
+		Nickname:         nickname,
+		One_line_introduce: oneLineIntroduce,
 	}
+
 	return personalData, nil
 }
+
 
 func setPersonalDataToDB(personalData, currentData PersonalData, id string) error {
 	// 닉네임이 변경 된 경우

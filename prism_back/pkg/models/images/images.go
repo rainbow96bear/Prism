@@ -34,25 +34,31 @@ func GetImageHandler(res http.ResponseWriter, req *http.Request){
 }
 
 func upload(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	id := vars["id"]
+
 	// 폼 데이터에서 파일 가져오기
 	file, _, err := req.FormFile("file")
 	if err != nil {
+		if err == http.ErrMissingFile {
+			return
+		}
+		// 다른 오류가 발생한 경우
 		http.Error(res, "Failed to read form file", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
-	// 새로운 파일명 생성 (예: timestamp)
-	timestamp := time.Now().UnixNano()
-	fileName := fmt.Sprintf("%d_%s", timestamp, getFileName(file))
+	// 파일 확장자 추출
+	fileExtension := os.Getenv("PROFILE_IMAGE_EXTENSION")
 
-	// 파일을 업로드할 경로 생성
-	filePath := filepath.Join(imageFolder, fileName, ".jpg")
-	fmt.Println(filePath)
-	// 파일 생성
+	// 파일을 업로드할 경로 생성 (기존 파일 덮어쓰기)
+	filePath := filepath.Join(imageFolder, id+fileExtension)
+
+	// 파일 생성 또는 기존 파일 덮어쓰기
 	newFile, err := os.Create(filePath)
 	if err != nil {
-		http.Error(res, "Failed to create new file", http.StatusInternalServerError)
+		http.Error(res, "Failed to create or overwrite file", http.StatusInternalServerError)
 		return
 	}
 	defer newFile.Close()
@@ -138,7 +144,6 @@ func getImageHandler(res http.ResponseWriter, req *http.Request) {
 
 	// 이미지 파일의 실제 경로를 생성
 	filePath := "../assets/profile/" + id + ".jpg"
-	fmt.Println(id)
 	// 이미지 파일 서빙
 	http.ServeFile(res, req, filePath)
 }
