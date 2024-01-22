@@ -27,7 +27,9 @@ const UserInfo = () => {
       <SubBox>
         <div className="nickname">{personalDate.nickname}</div>
         <div className="oneLineIntroduce">
-          {personalDate.one_line_introduce}
+          {personalDate.one_line_introduce == ""
+            ? "한 줄 소개"
+            : personalDate.one_line_introduce}
         </div>
         {personalDate.hashtag.map((value, index) => (
           <div className="hashtag" key={index}>

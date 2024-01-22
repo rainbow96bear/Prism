@@ -86,7 +86,7 @@ const UserInfo = () => {
       // Add image file to FormData
       if (uploadedImage) {
         const imageFile = dataURItoBlob(uploadedImage);
-        formData.append("file", imageFile, "profile_image.png");
+        formData.append("image", imageFile, imageFile.type);
       }
 
       // Add other form data

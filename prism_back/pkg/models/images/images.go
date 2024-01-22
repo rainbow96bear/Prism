@@ -3,6 +3,9 @@ package images
 import (
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -12,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/nfnt/resize"
 )
 
 // 업로드된 이미지를 저장할 폴더의 경로를 지정합니다.
@@ -38,7 +42,7 @@ func upload(res http.ResponseWriter, req *http.Request) {
 	id := vars["id"]
 
 	// 폼 데이터에서 파일 가져오기
-	file, _, err := req.FormFile("file")
+	file, handler, err := req.FormFile("image")
 	if err != nil {
 		if err == http.ErrMissingFile {
 			return
@@ -49,24 +53,55 @@ func upload(res http.ResponseWriter, req *http.Request) {
 	}
 	defer file.Close()
 
-	// 파일 확장자 추출
-	fileExtension := os.Getenv("PROFILE_IMAGE_EXTENSION")
-
-	// 파일을 업로드할 경로 생성 (기존 파일 덮어쓰기)
-	filePath := filepath.Join(imageFolder, id+fileExtension)
-
-	// 파일 생성 또는 기존 파일 덮어쓰기
+	// 파일을 업로드할 경로 생성
+	filePath := filepath.Join(imageFolder, id+".jpg")
 	newFile, err := os.Create(filePath)
 	if err != nil {
-		http.Error(res, "Failed to create or overwrite file", http.StatusInternalServerError)
+		http.Error(res, "Unable to create new file", http.StatusInternalServerError)
 		return
 	}
 	defer newFile.Close()
 
-	// 파일 복사
+	// 파일에 데이터 복사
 	_, err = io.Copy(newFile, file)
 	if err != nil {
-		http.Error(res, "Failed to copy file", http.StatusInternalServerError)
+		http.Error(res, "Failed to copy file data", http.StatusInternalServerError)
+		return
+	}
+
+	// 이미지를 디코딩
+	newFile.Seek(0, 0) // 파일을 처음으로 돌려놓아야 합니다.
+	var img image.Image
+	if filepath.Ext(handler.Filename) == ".png" {
+		img, err = png.Decode(newFile)
+		if err != nil {
+			http.Error(res, "Unable to decode PNG image", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		// 기본적으로 JPEG로 처리
+		img, _, err = image.Decode(newFile)
+		if err != nil {
+			http.Error(res, "Unable to decode image", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// 이미지 크기 조절
+	resizedImg := resize.Resize(300, 0, img, resize.Lanczos3)
+
+	// 파일을 업로드할 경로 생성 (기존 파일 덮어쓰기)
+	outputFile, err := os.Create(filePath)
+	if err != nil {
+		http.Error(res, "Unable to create output file", http.StatusInternalServerError)
+		return
+	}
+	defer outputFile.Close()
+
+	// 이미지를 JPEG로 인코딩하여 저장
+	err = jpeg.Encode(outputFile, resizedImg, nil)
+	if err != nil {
+		http.Error(res, "Unable to save resized image", http.StatusInternalServerError)
 		return
 	}
 
