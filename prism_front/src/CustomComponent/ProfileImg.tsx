@@ -5,8 +5,8 @@ interface ComponentProps {
 }
 
 const ProfileImage: React.FC<ComponentProps> = ({ id }) => {
-  const imageUrl = `http://localhost:8080/assets/images/profiles/${id}.jpg`;
-
+  const server = process.env.REACT_APP_SERVER_URL;
+  const imageUrl = `${server}/assets/images/profiles/${id}.jpg`;
   return <ImgBox src={imageUrl}></ImgBox>;
 };
 

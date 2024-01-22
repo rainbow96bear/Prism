@@ -18,17 +18,27 @@ const UserInfo = () => {
   const navigator = useNavigate();
   const [nickname, setNickname] = useState(personalDate.nickname);
   const [hashTag, setHashTag] = useState(personalDate.hashtag);
-  const [one_line_introduce, setOneLineIntroduce] = useState(
-    personalDate.one_line_introduce
-  );
+  const [one_line_introduce, setOneLineIntroduce] = useState<
+    string | undefined
+  >(undefined);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   useEffect(() => {
     // user_id가 존재할 때만 사용자 정보를 가져오도록 함
     if (user.user_id) {
       dispatch(getPersonalDate(user.user_id));
+      setOneLineIntroduce(personalDate.one_line_introduce);
+      setNickname(personalDate.nickname);
     }
   }, [dispatch, user.user_id]);
+
+  useEffect(() => {
+    // user_id가 존재할 때만 사용자 정보를 가져오도록 함
+    if (personalDate.nickname) {
+      setOneLineIntroduce(personalDate.one_line_introduce);
+      setNickname(personalDate.nickname);
+    }
+  }, [dispatch, personalDate.nickname]);
 
   useEffect(() => {
     // 컴포넌트가 처음 마운트될 때에만 사용자 정보를 가져오도록 함
@@ -81,7 +91,9 @@ const UserInfo = () => {
 
       // Add other form data
       formData.append("nickname", nickname);
-      formData.append("one_line_introduce", one_line_introduce);
+      if (one_line_introduce != undefined) {
+        formData.append("one_line_introduce", one_line_introduce);
+      }
       // formData.append("hashtag", hashTag);
 
       const response = await axios.post(
@@ -96,7 +108,7 @@ const UserInfo = () => {
       );
 
       if (response.status === 200) {
-        window.location.href = `http://localhost:3000/profile/${user.user_id}`;
+        window.location.href = `/profile/${user.user_id}`;
       } else {
         console.error("사용자 정보 업데이트에 실패했습니다");
       }
@@ -138,16 +150,16 @@ const UserInfo = () => {
         />
         <input
           type="text"
-          value={nickname != "" ? nickname : personalDate.nickname}
+          value={nickname == undefined ? personalDate.nickname : nickname}
           onChange={handleNicknameChange}
           placeholder="닉네임"
         />
         <input
           type="text"
           value={
-            one_line_introduce != ""
-              ? one_line_introduce
-              : personalDate.one_line_introduce
+            one_line_introduce == undefined
+              ? personalDate.one_line_introduce
+              : one_line_introduce
           }
           onChange={handleIntroduceChange}
           placeholder="한 줄 소개"

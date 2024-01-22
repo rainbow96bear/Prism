@@ -7,7 +7,7 @@ import (
 	"os"
 	mysql "prism_back/internal/Database/mysql"
 	"prism_back/internal/session"
-	"prism_back/pkg/handlers/images"
+	"prism_back/pkg/handlers/assets"
 	"prism_back/pkg/handlers/root"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -25,7 +25,7 @@ func main() {
 	
 	r.Use(corsMiddleware)
 	root.RegisterHandlers(r.PathPrefix("/api").Subrouter())
-	images.RegisterHandlers(r.PathPrefix("/assets").Subrouter())
+	assets.RegisterHandlers(r.PathPrefix("/assets").Subrouter())
 	log.Println("Prism Server Starting on Port :", port)
 	
 	// 라우터에 CORS 미들웨어 추가
