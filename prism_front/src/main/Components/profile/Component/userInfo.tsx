@@ -19,7 +19,6 @@ const UserInfo = () => {
   const { id } = useParams();
   useEffect(() => {
     dispatch(getPersonalDate(id));
-    console.log(personalDate);
   }, []);
 
   return (

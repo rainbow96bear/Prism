@@ -19,11 +19,11 @@ type PersonalData struct {
 func (p *PersonalData)GetPersonalData(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id := vars["id"]
-	personaldata, err := getPersonalData(id)
+	personalData, err := getPersonalData(id)
 	if err != nil {
 		http.Error(res, "Missing 'id' parameter", http.StatusBadRequest)
 	}
-	jsonResponse, err := json.Marshal(personaldata)
+	jsonResponse, err := json.Marshal(personalData)
 	if err != nil {
 		log.Println(err)
 	}
@@ -53,7 +53,14 @@ func (p *PersonalData) SetPersonalData(res http.ResponseWriter, req *http.Reques
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	// 변경된 값에 대해서만 업데이트
+	jsonResponse, err := json.Marshal(personalData)
+	if err != nil {
+		log.Println(err)
+	}
+	res.Header().Set("Content-Type", "application/json")
+	res.Write(jsonResponse)
 }
 
 
@@ -77,7 +84,7 @@ func getPersonalData(id string) (PersonalData, error) {
 		return PersonalData{}, err
 	}
 
-	hashtagQuery := `SELECT hashtag_list.hashtag FROM hashtag_list WHERE profile_Id IN (SELECT id FROM profile WHERE user_info_User_id = ?)`
+	hashtagQuery := `SELECT hashtag_list.hashtag FROM hashtag_list WHERE profile_Id = ?`
 	rows, err := tx.Query(hashtagQuery, id)
 	if err != nil {
 		log.Println(err)
@@ -171,15 +178,7 @@ func setHashTags(hashtagArray []string, id string) error {
 	}()
 	
 	// Hashtags 테이블에서 해당 ProfileID에 해당하는 레코드 삭제
-	_, err = tx.Exec("DELETE FROM hashtag_list WHERE profile_id IN (SELECT id FROM profile WHERE user_info_User_id = ?)", id)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// user_info_User_id 값이 id와 일치하는 profile 테이블의 row의 id 값을 가져오기
-	var profileID string
-	err = tx.QueryRow("SELECT id FROM profile WHERE user_info_User_id = ?", id).Scan(&profileID)
+	_, err = tx.Exec("DELETE FROM hashtag_list WHERE profile_id = ?", id)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -187,7 +186,7 @@ func setHashTags(hashtagArray []string, id string) error {
 
 	// profile_id 값이 가져온 profileID인 row를 hashtag_list 테이블에 추가
 	for _, value := range hashtagArray {
-		_, err := tx.Exec("INSERT INTO hashtag_list(profile_Id, hashtag) VALUES(?, ?)", profileID, value)
+		_, err := tx.Exec("INSERT INTO hashtag_list(profile_Id, hashtag) VALUES(?, ?)", id, value)
 		if err != nil {
 			tx.Rollback()
 			return err

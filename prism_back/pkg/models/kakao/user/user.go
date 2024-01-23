@@ -48,7 +48,7 @@ func (k *KakaoUser)GetUserInfo(res http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			log.Println("사용자 정보 저장 실패 : ", err)
 		}
-		_, err = mysql.DB.Exec("INSERT INTO profile (user_info_User_id) VALUES (?)", kakaoUser.User_id)
+		_, err = mysql.DB.Exec("INSERT INTO profile (Id, user_info_User_id) VALUES (?, ?)", kakaoUser.User_id, kakaoUser.User_id)
 		if err != nil {
 			log.Println("프로필 정보 저장 실패 : ", err)
 		}

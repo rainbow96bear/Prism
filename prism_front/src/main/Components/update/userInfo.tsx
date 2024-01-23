@@ -6,8 +6,8 @@ import axios from "./../../../configs/AxiosConfig";
 import { AppDispatch, RootState } from "../../../app/store";
 import { getPersonalDate } from "../../../app/slices/profile/personal_data";
 import { useNavigate } from "react-router-dom";
-import HashTagItem from "./Component/hashtagItem";
-import HashTagInput from "./Component/hashtagInput";
+import HashTagItem from "./HashtagComponent/hashtagItem";
+import HashTagInput from "./HashtagComponent/hashtagInput";
 import ProfileImage from "../../../CustomComponent/ProfileImg";
 import { fetchUser } from "../../../app/slices/user/user";
 
@@ -24,7 +24,6 @@ const UserInfo = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   useEffect(() => {
-    // user_id가 존재할 때만 사용자 정보를 가져오도록 함
     if (user.user_id) {
       dispatch(getPersonalDate(user.user_id));
       setOneLineIntroduce(personalDate.one_line_introduce);
@@ -33,7 +32,6 @@ const UserInfo = () => {
   }, [dispatch, user.user_id]);
 
   useEffect(() => {
-    // user_id가 존재할 때만 사용자 정보를 가져오도록 함
     if (personalDate.nickname) {
       setOneLineIntroduce(personalDate.one_line_introduce);
       setNickname(personalDate.nickname);
@@ -41,7 +39,6 @@ const UserInfo = () => {
   }, [dispatch, personalDate.nickname]);
 
   useEffect(() => {
-    // 컴포넌트가 처음 마운트될 때에만 사용자 정보를 가져오도록 함
     dispatch(fetchUser());
   }, [dispatch]);
 
@@ -62,7 +59,6 @@ const UserInfo = () => {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // 선택한 파일을 미리보기로 설정
       const reader = new FileReader();
       reader.onloadend = () => {
         setUploadedImage(reader.result as string);
@@ -83,13 +79,11 @@ const UserInfo = () => {
     try {
       const formData = new FormData();
 
-      // Add image file to FormData
       if (uploadedImage) {
         const imageFile = dataURItoBlob(uploadedImage);
         formData.append("image", imageFile, imageFile.type);
       }
 
-      // Add other form data
       if (nickname != undefined) {
         formData.append("nickname", nickname);
       }
@@ -105,7 +99,7 @@ const UserInfo = () => {
         {
           withCredentials: true,
           headers: {
-            "Content-Type": "multipart/form-data", // Set content type to multipart/form-data
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -113,14 +107,13 @@ const UserInfo = () => {
       if (response.status === 200) {
         window.location.href = `/profile/${user.user_id}`;
       } else {
-        console.error("사용자 정보 업데이트에 실패했습니다");
+        console.error("Failed to update user information");
       }
     } catch (error) {
-      console.error("Axios 요청 중 오류 발생:", error);
+      console.error("Axios request error:", error);
     }
   };
 
-  // Data URI를 Blob 객체로 변환
   const dataURItoBlob = (dataURI: string) => {
     const byteString = atob(dataURI.split(",")[1]);
     const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
@@ -133,15 +126,15 @@ const UserInfo = () => {
 
     return new Blob([ab], { type: mimeString });
   };
+
   return (
     <Container>
       <InputBox>
-        <ImageBox onClick={handleImageClick} style={{ cursor: "pointer" }}>
+        <ImageBox onClick={handleImageClick}>
           {uploadedImage != null ? (
             <img src={uploadedImage} alt="User Profile" />
           ) : (
-            <ProfileImage
-              id={user.user_id != "" ? user.user_id : "default"}></ProfileImage>
+            <ProfileImage id={user.user_id || "default"} />
           )}
         </ImageBox>
         <input
@@ -151,13 +144,13 @@ const UserInfo = () => {
           style={{ display: "none" }}
           onChange={handleImageChange}
         />
-        <input
+        <Input
           type="text"
           value={nickname == undefined ? personalDate.nickname : nickname}
           onChange={handleNicknameChange}
           placeholder="닉네임"
         />
-        <input
+        <Input
           type="text"
           value={
             one_line_introduce == undefined
@@ -184,18 +177,10 @@ const UserInfo = () => {
         </HashTagBox>
       </InputBox>
       <FuncBox>
-        <div
-          onClick={() => {
-            navigator(`/profile/${user.user_id}`);
-          }}>
+        <Button onClick={() => navigator(`/profile/${user.user_id}`)}>
           취소
-        </div>
-        <div
-          onClick={() => {
-            saveChangedUserInfo();
-          }}>
-          저장
-        </div>
+        </Button>
+        <Button onClick={saveChangedUserInfo}>저장</Button>
       </FuncBox>
     </Container>
   );
@@ -250,7 +235,7 @@ const ImageBox = styled.div`
   &:before {
     content: "";
     display: block;
-    padding-bottom: 100%; // 1:1 비율을 위한 값
+    padding-bottom: 100%;
   }
 
   > img {
@@ -259,6 +244,27 @@ const ImageBox = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; // 이미지가 비율을 유지하며 박스를 채우도록 함
+    object-fit: cover;
+  }
+`;
+
+const Input = styled.input`
+  width: 400px;
+  padding: 10px;
+  margin: 10px;
+`;
+
+const Button = styled.div`
+  cursor: pointer;
+  padding: 10px;
+  background-color: #3498db;
+  color: #fff;
+  border: 1px solid #3498db;
+  border-radius: 5px;
+  margin-right: 10px;
+  display: inline-block;
+
+  &:last-child {
+    margin-right: 0;
   }
 `;
