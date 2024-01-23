@@ -19,6 +19,7 @@ const UserInfo = () => {
   const { id } = useParams();
   useEffect(() => {
     dispatch(getPersonalDate(id));
+    console.log(personalDate);
   }, []);
 
   return (
@@ -31,11 +32,13 @@ const UserInfo = () => {
             ? "한 줄 소개"
             : personalDate.one_line_introduce}
         </div>
-        {personalDate.hashtag.map((value, index) => (
-          <div className="hashtag" key={index}>
-            #{value}
-          </div>
-        ))}
+        <HashtagBox>
+          {personalDate?.hashtag?.map((value, index) => (
+            <div className="hashtag" key={index}>
+              #{value}
+            </div>
+          ))}
+        </HashtagBox>
       </SubBox>
       <div>
         {user.user_id == id ? (
@@ -80,5 +83,12 @@ const SubBox = styled.div`
   }
   .hashtag {
     font-size: 1.2rem;
+  }
+`;
+
+const HashtagBox = styled.div`
+  display: flex;
+  > div {
+    padding: 0px 15px 0px 0px;
   }
 `;

@@ -49,13 +49,20 @@ func (p *PersonalData) SetPersonalData(res http.ResponseWriter, req *http.Reques
 	}
 	images.UploadImageHandler(res, req)
 	setPersonalDataToDB(personalData, currentData, id)
+	err = setHashTags(personalData.HashTag, id)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	// 변경된 값에 대해서만 업데이트
 }
 
 
 func getPersonalData(id string) (PersonalData, error) {
-	// "id" 쿼리 매개변수 값 얻기
-	// id 값이 빈 문자열인 경우에 대한 처리
+
+	tx, err := mysql.DB.Begin()
+	if err != nil {
+		return PersonalData{}, err
+	}
 
 	var personaldata PersonalData
 	query := `
@@ -63,11 +70,40 @@ func getPersonalData(id string) (PersonalData, error) {
     FROM profile
     JOIN user_info ON profile.user_info_User_id = user_info.User_id
 	WHERE profile.user_info_User_id = ?
-`
-	err := mysql.DB.QueryRow(query, id).Scan(&personaldata.Nickname, &personaldata.One_line_introduce)
+`	
+	err = tx.QueryRow(query, id).Scan(&personaldata.Nickname, &personaldata.One_line_introduce)
 	if err != nil {
 		log.Println(err)
+		return PersonalData{}, err
 	}
+
+	hashtagQuery := `SELECT hashtag_list.hashtag FROM hashtag_list WHERE profile_Id IN (SELECT id FROM profile WHERE user_info_User_id = ?)`
+	rows, err := tx.Query(hashtagQuery, id)
+	if err != nil {
+		log.Println(err)
+		return PersonalData{}, err
+	}
+	defer rows.Close()
+
+	// hashtag를 배열로 저장
+	for rows.Next() {
+		var hashtag string
+		if err := rows.Scan(&hashtag); err != nil {
+			log.Println(err)
+			return PersonalData{}, err
+		}
+		personaldata.HashTag = append(personaldata.HashTag, hashtag)
+	}
+	if err := rows.Err(); err != nil {
+		log.Println(err)
+		return PersonalData{}, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return PersonalData{}, err
+	}
+
 	return personaldata, nil
 }
 
@@ -80,11 +116,18 @@ func getPersonalDataFromReq(res http.ResponseWriter, req *http.Request) (Persona
 
 	nickname := req.FormValue("nickname")
 	oneLineIntroduce := req.FormValue("one_line_introduce")
+	hashtags := req.FormValue("hashtags")
 
+	var hashtagArray []string
+	err = json.Unmarshal([]byte(hashtags), &hashtagArray)
+	if err != nil {
+		return PersonalData{}, err
+	}
 	// 필요한 정보만 담아서 PersonalData 생성
 	personalData := PersonalData{
 		Nickname:         nickname,
 		One_line_introduce: oneLineIntroduce,
+		HashTag: hashtagArray,
 	}
 
 	return personalData, nil
@@ -112,4 +155,50 @@ func setPersonalDataToDB(personalData, currentData PersonalData, id string) erro
 	}
 	
     return nil
+}
+
+func setHashTags(hashtagArray []string, id string) error {
+	tx, err := mysql.DB.Begin()
+	if err != nil {
+		return err
+	}
+
+	// 에러 발생 시 롤백
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	
+	// Hashtags 테이블에서 해당 ProfileID에 해당하는 레코드 삭제
+	_, err = tx.Exec("DELETE FROM hashtag_list WHERE profile_id IN (SELECT id FROM profile WHERE user_info_User_id = ?)", id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// user_info_User_id 값이 id와 일치하는 profile 테이블의 row의 id 값을 가져오기
+	var profileID string
+	err = tx.QueryRow("SELECT id FROM profile WHERE user_info_User_id = ?", id).Scan(&profileID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// profile_id 값이 가져온 profileID인 row를 hashtag_list 테이블에 추가
+	for _, value := range hashtagArray {
+		_, err := tx.Exec("INSERT INTO hashtag_list(profile_Id, hashtag) VALUES(?, ?)", profileID, value)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	// 트랜잭션 커밋
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

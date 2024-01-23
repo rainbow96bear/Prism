@@ -10,7 +10,7 @@ interface PersonalData {
 const initialState: PersonalData = {
   nickname: "",
   one_line_introduce: "",
-  hashtag: ["golang"],
+  hashtag: [],
 };
 
 export const getPersonalDate = createAsyncThunk<
@@ -35,6 +35,11 @@ const personalDateSlice = createSlice({
       .addCase(getPersonalDate.fulfilled, (state, action) => {
         state.nickname = action.payload.nickname;
         state.one_line_introduce = action.payload.one_line_introduce;
+        if (action.payload.hashtag == undefined) {
+          state.hashtag = [];
+        } else {
+          state.hashtag = action.payload.hashtag;
+        }
       })
       .addCase(getPersonalDate.rejected, (state, action) => {
         console.error("Error fetching user info:", action.error.message);

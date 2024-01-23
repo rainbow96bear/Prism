@@ -16,7 +16,7 @@ const UserInfo = () => {
   const user = useSelector((state: RootState) => state.user);
   const personalDate = useSelector((state: RootState) => state.personal_data);
   const navigator = useNavigate();
-  const [nickname, setNickname] = useState(personalDate.nickname);
+  const [nickname, setNickname] = useState<string | undefined>(undefined);
   const [hashTag, setHashTag] = useState(personalDate.hashtag);
   const [one_line_introduce, setOneLineIntroduce] = useState<
     string | undefined
@@ -90,11 +90,14 @@ const UserInfo = () => {
       }
 
       // Add other form data
-      formData.append("nickname", nickname);
+      if (nickname != undefined) {
+        formData.append("nickname", nickname);
+      }
       if (one_line_introduce != undefined) {
         formData.append("one_line_introduce", one_line_introduce);
       }
-      // formData.append("hashtag", hashTag);
+      const hashtagsJsonString = JSON.stringify(hashTag);
+      formData.append("hashtags", hashtagsJsonString);
 
       const response = await axios.post(
         `/profile/update/${user.user_id}`,
@@ -165,14 +168,17 @@ const UserInfo = () => {
           placeholder="한 줄 소개"
         />
         <HashTagBox>
-          {hashTag.map((value, index) => (
+          {hashTag?.map((value, index) => (
             <HashTagItem
               key={index}
               content={value}
               onRemove={() => handleHashTagRemove(index)}
             />
           ))}
-          {hashTag.length < 5 && (
+          {hashTag == undefined && (
+            <HashTagInput prevHashTag={hashTag} setHashTag={setHashTag} />
+          )}
+          {hashTag?.length < 5 && (
             <HashTagInput prevHashTag={hashTag} setHashTag={setHashTag} />
           )}
         </HashTagBox>

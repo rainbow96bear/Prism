@@ -21,8 +21,8 @@ const HashTagInput: React.FC<HashTagInputProps> = ({
       // 이미 존재하는 해시태그인지 검사
       if (!prevHashTag.includes(inputValue.trim())) {
         setHashTag((prevHashTag) => [...prevHashTag, inputValue.trim()]);
-        setInputValue("");
       }
+      setInputValue("");
     }
   };
 
@@ -31,8 +31,8 @@ const HashTagInput: React.FC<HashTagInputProps> = ({
       // 이미 존재하는 해시태그인지 검사
       if (!prevHashTag.includes(inputValue.trim())) {
         setHashTag((prevHashTag) => [...prevHashTag, inputValue.trim()]);
-        setInputValue("");
       }
+      setInputValue("");
     }
   };
 
