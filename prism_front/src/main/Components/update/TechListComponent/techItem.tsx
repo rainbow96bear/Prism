@@ -52,6 +52,8 @@ const Title = styled.div`
   border-radius: 20px;
   font-weight: bold;
   padding: 10px 15px;
+  width: 110px;
+  text-align: center;
 `;
 
 const LevelBar = styled.div`

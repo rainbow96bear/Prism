@@ -10,13 +10,18 @@ import TechItem from "./TechListComponent/techItem";
 import styled from "styled-components";
 import { TechData } from "../../../GlobalType/Tech";
 import { useNavigate } from "react-router";
+import axios from "../../../configs/AxiosConfig";
 
 const TechList = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const tech_list = useSelector((state: RootState) => state.tech_data);
+  const user_tech_list = useSelector((state: RootState) => state.tech_data);
   const user = useSelector((state: RootState) => state.user);
   const navigator = useNavigate();
-  const [techList, setTechList] = useState<TechData[]>(tech_list.tech_list);
+  const [userTechList, setUserTechList] = useState<TechData[]>(
+    user_tech_list.tech_list ?? []
+  );
+
+  const [techList, setTechList] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [selectedResultIndex, setSelectedResultIndex] = useState(-1);
@@ -28,13 +33,27 @@ const TechList = () => {
     dispatch(getTechList(user.user_id));
   }, [dispatch, user.user_id]);
 
+  useEffect(() => {
+    const getTechList = async () => {
+      try {
+        const result = await axios.get("/profile/tech/name_list", {
+          withCredentials: true,
+        });
+        setTechList(result.data);
+      } catch (error) {
+        console.error("techList 받아오는 중 에러 발생:", error);
+      }
+    };
+    getTechList();
+  }, []);
+
   // 검색어 입력 시 호출되는 함수
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     setSearchTerm(value);
 
     // 검색어에 따라 결과 필터링
-    const filteredResults = ["React", "Node.js", "JavaScript"].filter((tech) =>
+    const filteredResults = techList.filter((tech) =>
       tech.toLowerCase().includes(value.toLowerCase())
     );
 
@@ -48,13 +67,13 @@ const TechList = () => {
     setSearchTerm("");
 
     // Check for duplicate values
-    if (techList.some((tech) => tech.tech_name === selectedTech)) {
+    if (userTechList?.some((tech) => tech.tech_name === selectedTech)) {
       alert("중복된 값은 추가할 수 없습니다.");
       return;
     }
 
     // 선택한 결과를 기존 기술 목록에 추가 (레벨 0으로)
-    setTechList((prevTechList) => [
+    setUserTechList((prevTechList) => [
       ...prevTechList,
       { tech_name: selectedTech, level: 0 },
     ]);
@@ -89,14 +108,14 @@ const TechList = () => {
 
   // 기존 기술 삭제 함수
   const handleRemoveTech = (techName: string) => {
-    setTechList((prevTechList) =>
+    setUserTechList((prevTechList) =>
       prevTechList.filter((tech) => tech.tech_name !== techName)
     );
   };
 
   // 기술 레벨 낮추기 함수
   const handleDecrementLevel = (techName: string) => {
-    setTechList((prevTechList) =>
+    setUserTechList((prevTechList) =>
       prevTechList.map((tech) =>
         tech.tech_name === techName && tech.level > 0
           ? { ...tech, level: tech.level - 1 }
@@ -107,13 +126,26 @@ const TechList = () => {
 
   // 기술 레벨 올리기 함수
   const handleIncrementLevel = (techName: string) => {
-    setTechList((prevTechList) =>
+    setUserTechList((prevTechList) =>
       prevTechList.map((tech) =>
         tech.tech_name === techName && tech.level < 10
           ? { ...tech, level: tech.level + 1 }
           : tech
       )
     );
+  };
+
+  const saveTech = async (userTechList: TechData[]) => {
+    const result = await axios.post(
+      `/profile/update/techs/${user.user_id}`,
+      {
+        userTechList,
+      },
+      {
+        withCredentials: true,
+      }
+    );
+    navigator(`/profile/${user.user_id}`);
   };
 
   // 외부 클릭 이벤트 리스너 등록
@@ -126,7 +158,7 @@ const TechList = () => {
 
   return (
     <Container ref={containerRef}>
-      {techList.map((value, index) => (
+      {userTechList?.map((value, index) => (
         <TechItem
           key={index}
           tech_name={value.tech_name}
@@ -158,8 +190,15 @@ const TechList = () => {
         )}
       </SearchContainer>
       <ButtonContainer>
-        <Button>취소</Button>
-        <Button onClick={() => console.log("Save button clicked")}>저장</Button>
+        <Button onClick={() => navigator(`/profile/${user.user_id}`)}>
+          취소
+        </Button>
+        <Button
+          onClick={() => {
+            saveTech(userTechList);
+          }}>
+          저장
+        </Button>
       </ButtonContainer>
     </Container>
   );

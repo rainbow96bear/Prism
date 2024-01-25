@@ -20,7 +20,7 @@ const AdminMain = () => {
     const checkAdmin = async () => {
       try {
         const checkResult = (
-          await axios.get("/admin/user/check", {
+          await axios.get("/admin/user/status", {
             withCredentials: true,
           })
         ).data;

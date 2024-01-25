@@ -9,6 +9,7 @@ import (
 	"prism_back/internal/session"
 	"prism_back/pkg/handlers/assets"
 	"prism_back/pkg/handlers/root"
+	"prism_back/pkg/models/admin"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -22,7 +23,10 @@ func main() {
 
 	mysql.SetupDB()
 	session.SetupStore()
-	
+	err := admin.MakeRootAdmin()
+	if err != nil {
+		return
+	}
 	r.Use(corsMiddleware)
 	root.RegisterHandlers(r.PathPrefix("/api").Subrouter())
 	assets.RegisterHandlers(r.PathPrefix("/assets").Subrouter())

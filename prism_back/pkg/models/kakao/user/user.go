@@ -123,18 +123,18 @@ func createSession(user KakaoUser, res http.ResponseWriter, req *http.Request) (
 
 // 로그아웃
 func kakaoLogout(res http.ResponseWriter, req *http.Request) (err error) {
-	session, err := session.Store.Get(req, "user_login")
-	if err != nil {
-		return fmt.Errorf("세션 불러오기 실패 : %e", err)
-	}
+	// session, err := session.Store.Get(req, "user_login")
+	// if err != nil {
+	// 	return fmt.Errorf("세션 불러오기 실패 : %e", err)
+	// }
 
-	session.Values["User_ID"] = nil
-	session.Values["User_ProfileImg"] = nil
-	err = session.Save(req, res)
+	// session.Values["User_ID"] = nil
+	// session.Values["User_ProfileImg"] = nil
+	// err = session.Save(req, res)
 
-	if err != nil {
-		return fmt.Errorf("세션 저장 실패 : %e", err)
-	}
+	// if err != nil {
+	// 	return fmt.Errorf("세션 저장 실패 : %e", err)
+	// }
 
 	// 브라우저에 저장된 쿠키를 만료시켜 제거
 	http.SetCookie(res, &http.Cookie{
@@ -143,8 +143,13 @@ func kakaoLogout(res http.ResponseWriter, req *http.Request) (err error) {
 		MaxAge: -1,
 		Domain: os.Getenv("COOKIE_DOMAIN"),
 		Path:   "/",
+		HttpOnly: true,
 	})
-
+	session, err := session.Store.Get(req, "user_login")
+    if err == nil {
+        session.Options.MaxAge = -1
+        session.Save(req, res)
+    }
 	return nil
 }
 

@@ -45,10 +45,8 @@ const techDataSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getTechList.fulfilled, (state, action) => {
-        if (
-          action.payload?.tech_list == undefined ||
-          action.payload?.tech_list == null
-        ) {
+        console.log(action.payload);
+        if (action.payload == undefined || action.payload == null) {
           state.tech_list = [];
         } else {
           state.tech_list = action.payload?.tech_list;

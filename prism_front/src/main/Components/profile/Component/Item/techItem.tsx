@@ -35,6 +35,8 @@ const Title = styled.div`
   border: 2px solid lightgray;
   border-radius: 20px;
   font-weight: bold;
+  width: 110px;
+  text-align: center;
 `;
 
 const LevelBar = styled.div`

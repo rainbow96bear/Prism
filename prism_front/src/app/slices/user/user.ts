@@ -23,9 +23,13 @@ export const fetchUser = createAsyncThunk<User>(
 );
 
 export const logout = createAsyncThunk("auth/logout", async () => {
-  await axios.post("/OAuth/kakao/logout", {
-    withCredentials: true,
-  });
+  await axios.post(
+    "/OAuth/kakao/logout",
+    {},
+    {
+      withCredentials: true,
+    }
+  );
 
   // 로그아웃 후 리턴되는 데이터를 사용하려면 여기에 추가 코드 작성 가능
 });
