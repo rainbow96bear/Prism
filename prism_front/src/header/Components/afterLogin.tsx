@@ -3,35 +3,31 @@ import { FaRegBell } from "react-icons/fa";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { FaRegEdit } from "react-icons/fa";
 import { useState } from "react";
-import axios from "./../../configs/AxiosConfig";
+import { useDispatch, useSelector } from "react-redux";
 
 import DropDown from "../../CustomComponent/DropDown";
 import { TitlePath } from "../../GlobalType/TitlePath";
+import { AppDispatch, RootState } from "../../app/store";
+import { logout } from "../../app/slices/user/user";
+import ProfileImage from "../../CustomComponent/ProfileImg";
+import { useNavigate } from "react-router-dom";
 
 interface AfterLoginProps {
   userID?: string;
-  imgUrl?: string;
 }
 
-const AfterLogin: React.FC<AfterLoginProps> = ({ userID, imgUrl }) => {
+const AfterLogin: React.FC<AfterLoginProps> = ({ userID }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigator = useNavigate();
+
   const [dropdown, setDropdown] = useState(false);
-  const logout = async () => {
-    try {
-      await axios.post("/OAuth/kakao/logout", {
-        withCredentials: true,
-      });
-      const User_Login = document.cookie;
-      const hasCookie = User_Login.includes("user_login");
-      if (!hasCookie) {
-        window.location.href = "http://localhost:3000";
-      }
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
+  const logoutFunc = () => {
+    dispatch(logout());
+    navigator("/");
   };
   const DropDown_List: TitlePath[] = [
     { title: "프로필", path: `/profile/${userID}` },
-    { title: "로그아웃", func: logout },
+    { title: "로그아웃", func: logoutFunc },
   ];
   return (
     <>
@@ -45,11 +41,10 @@ const AfterLogin: React.FC<AfterLoginProps> = ({ userID, imgUrl }) => {
         <FaRegEdit size={"100%"} />
       </ButtonBox>
       <ButtonBox>
-        <ProfileImg
-          onClick={() => setDropdown(!dropdown)}
-          src={imgUrl}
-          alt="User Profile"
-        />
+        <ImageBox onClick={() => setDropdown(!dropdown)}>
+          <ProfileImage
+            id={userID != undefined ? userID : "default"}></ProfileImage>
+        </ImageBox>
 
         {dropdown ? (
           <S_DropDown onClick={() => setDropdown(!dropdown)}>
@@ -72,14 +67,14 @@ const ButtonBox = styled.div`
   cursor: pointer;
 `;
 
-const ProfileImg = styled.img`
-  height: 100%;
-`;
-
 const S_DropDown = styled.div`
   width: 100px;
   position: absolute;
   right: 0px;
   top: 50px;
   margin: 10px 0px;
+`;
+
+const ImageBox = styled.div`
+  height: 100%;
 `;

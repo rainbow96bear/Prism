@@ -13,9 +13,9 @@ import (
 )
 
 type TechData struct {
-	TechCode string `json:"Tech_code"`
-	TechName string `json:"Tech_name"`
-	Count int `json:"Count"`
+	TechCode string `json:"tech_code"`
+	TechName string `json:"tech_name"`
+	Count int `json:"count"`
 }
 
 type PutTechData struct {
@@ -28,6 +28,29 @@ var err = godotenv.Load("./../../.env")
 func GetTechList(res http.ResponseWriter, req *http.Request) {
 	// GetTechList 함수를 통해 데이터베이스에서 기술 목록을 가져옴
 	list, err := R_TechList(mysql.DB)
+	if err != nil {
+		// 에러가 발생하면 에러 출력 후 HTTP 500 에러 응답
+		fmt.Println("DB 조회 실패:", err)
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// JSON으로 직렬화 
+	response, err := json.Marshal(list)
+	if err != nil {
+		// 직렬화 에러 발생 시 에러 출력 후 HTTP 500 에러 응답
+		fmt.Println("JSON 직렬화 실패:", err)
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// JSON 형식으로 응답
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusOK)
+	res.Write(response)
+}
+func GetTechsName(res http.ResponseWriter, req *http.Request) {
+	// GetTechList 함수를 통해 데이터베이스에서 기술 목록을 가져옴
+	list, err := R_TechsName(mysql.DB)
 	if err != nil {
 		// 에러가 발생하면 에러 출력 후 HTTP 500 에러 응답
 		fmt.Println("DB 조회 실패:", err)
@@ -134,6 +157,47 @@ func R_TechList(db *sql.DB) ([]TechData,error) {
 		}
 		list = append(list, data)
 	}
+	return list, nil
+}
+
+func R_TechsName(db *sql.DB) ([]string,error) {
+	tx, err := db.Begin()
+	if err != nil {
+		return []string{}, err
+	}
+
+	// 에러 발생 시 롤백
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	
+	query:= "SELECT `Tech_name` FROM tech_list"
+	rows, err := tx.Query(query)
+	if err != nil {
+		return []string{}, fmt.Errorf("DB 조회 실패 : %v", err)
+	}
+	defer rows.Close()
+
+	list := []string{}
+
+	for rows.Next() {
+		var data string
+		if err := rows.Scan(&data); err != nil {
+			return []string{}, fmt.Errorf("정보 입력 실패 : %v", err)
+		}
+		list = append(list, data)
+	}
+	if err := rows.Err(); err != nil {
+		return []string{}, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return []string{}, err
+	}
+
 	return list, nil
 }
 

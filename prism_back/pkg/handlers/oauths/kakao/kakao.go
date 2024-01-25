@@ -9,8 +9,6 @@ import (
 var kakaoUser = &user.KakaoUser{}
 
 func RegisterHandlers(r *mux.Router) {
-    
-    r.HandleFunc("/code", kakaoUser.Login).Methods("GET")
 
     r.HandleFunc("/userinfo", kakaoUser.GetUserInfo).Methods("GET")
 
