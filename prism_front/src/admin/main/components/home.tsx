@@ -13,9 +13,13 @@ const Home: React.FC<HomeProps> = ({ admin_info }) => {
   const navigate = useNavigate();
   const logout = async () => {
     try {
-      await axios.get("/admin/user/logout", {
-        withCredentials: true,
-      });
+      await axios.post(
+        "/admin/user/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
       navigate("/admin");
     } catch (err) {
       console.log(err);
