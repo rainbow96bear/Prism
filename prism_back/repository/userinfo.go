@@ -1,18 +1,15 @@
-package userinfo
+package repository
 
 import (
 	"database/sql"
+	"prism_back/pkg/models"
 )
 
-type UserInfo struct {
-	Id       string
-	NickName string
-	Create 	 func(tx *sql.Tx, userinf UserInfo)
-	Read 	 func(tx *sql.Tx, id string)
-	Update 	 func(tx *sql.Tx, userinfo UserInfo)
+type UserInfoReopository struct {
+	models.UserInfo
 }
 
-func Create(tx *sql.Tx, userinfo UserInfo) (err error){
+func (u *UserInfoReopository)Create(tx *sql.Tx, userinfo models.UserInfo) (err error){
 	var (
 		query string
 	)
@@ -32,23 +29,24 @@ func Create(tx *sql.Tx, userinfo UserInfo) (err error){
 	return nil
 }
 
-func Read(tx *sql.Tx, id string) (UserInfo, error){
-	var userinfo UserInfo
+// user_info 테이블에서 id에 해당하는 user_id, nickname 정보 얻기
+func (u *UserInfoReopository)Read(tx *sql.Tx, id string) (models.UserInfo, error){
+	var userinfo models.UserInfo
 	query := "SELECT `User_id`, `Nickname` FROM user_info WHERE user_id = ?"
 	err := tx.QueryRow(query, id).Scan(&userinfo.Id, &userinfo.NickName)
 	if err != nil {
 		tx.Rollback()
-		return UserInfo{}, err
+		return models.UserInfo{}, err
 	}
 	return userinfo, nil
 }
 
-func Update(tx *sql.Tx, userinfo UserInfo) (UserInfo, error){
+func (u *UserInfoReopository)Update(tx *sql.Tx, userinfo models.UserInfo) (models.UserInfo, error){
 	query := "UPDATE user_info SET Nickname = ? WHERE user_id = ?"
 	_, err := tx.Exec(query, userinfo.NickName, userinfo.Id)
 	if err != nil {
 		tx.Rollback()
-		return UserInfo{}, err
+		return models.UserInfo{}, err
 	}
 	return userinfo, nil
 }

@@ -1,19 +1,15 @@
-package hashtag
+package repository
 
 import (
 	"database/sql"
+	"prism_back/pkg/models"
 )
 
-type Hashtag struct {
-	Id 		string
-	Hashtag string
-	Create 	func(tx *sql.Tx, id, hashtag string)
-	Read 	func(tx *sql.Tx, id string)
-	Update 	func(tx *sql.Tx, id string, hashtagArray []string)
-	Delete 	func(tx *sql.Tx, id string)
+type HashtagRepository struct {
+	models.Hashtag
 }
 
-func Create(tx *sql.Tx, id, hashtag string) (string, error) {
+func (h *HashtagRepository)Create(tx *sql.Tx, id, hashtag string) (string, error) {
 	_, err := tx.Exec("INSERT INTO hashtag_list(profile_Id, hashtag) VALUES(?, ?)", id, hashtag)
 	if err != nil {
 		tx.Rollback()
@@ -22,7 +18,8 @@ func Create(tx *sql.Tx, id, hashtag string) (string, error) {
 	return hashtag, nil
 }
 
-func Read(tx *sql.Tx, id string) (HashtagList []string, err error) {
+// hashtag_list 테이블에서 id에 해당하는 hashtag list 얻기
+func (h *HashtagRepository)Read(tx *sql.Tx, id string) (HashtagList []string, err error) {
 	query := "SELECT hashtag FROM hashtag_list WHERE profile_Id = ?"
 	rows, err := tx.Query(query, id)
 	if err != nil {
@@ -43,11 +40,11 @@ func Read(tx *sql.Tx, id string) (HashtagList []string, err error) {
 	return HashtagList, nil
 }
 
-func Update(tx *sql.Tx, id string, hashtagArray []string) (hashtagList []Hashtag, err error){
+func (h *HashtagRepository)Update(tx *sql.Tx, id string, hashtagArray []string) (hashtagList []models.Hashtag, err error){
 	// Delete 메서드로 id에 해당하는 hashtag 삭제
-	err = Delete(tx, id)
+	err = h.Delete(tx, id)
 	if err != nil {
-		return []Hashtag{}, err
+		return []models.Hashtag{}, err
 	}
 
 	//profile_id 값이 가져온 profileID인 row를 hashtag_list 테이블에 추가
@@ -55,13 +52,13 @@ func Update(tx *sql.Tx, id string, hashtagArray []string) (hashtagList []Hashtag
 		_, err := tx.Exec("INSERT INTO hashtag_list(profile_Id, hashtag) VALUES(?, ?)", id, hashtag)
 		if err != nil {
 			tx.Rollback()
-			return []Hashtag{}, err
+			return []models.Hashtag{}, err
 		}
 	}
 	return hashtagList, nil
 }
 
-func Delete(tx *sql.Tx, id string) (err error){
+func (h *HashtagRepository)Delete(tx *sql.Tx, id string) (err error){
 	query := "DELETE FROM hashtag_list WHERE profile_Id = ?"
 	_, err = tx.Exec(query, id)
 	if err != nil {
