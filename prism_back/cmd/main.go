@@ -5,31 +5,40 @@ import (
 	"log"
 	"net/http"
 	"os"
-	mysql "prism_back/internal/Database/mysql"
-	"prism_back/internal/session"
-	"prism_back/pkg/handlers/assets"
-	"prism_back/pkg/handlers/root"
-	"prism_back/pkg/models/admin"
+	"prism_back/api/router"
+	"prism_back/internal/Database/mysql"
+	"prism_back/pkg"
+	"prism_back/service"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
 
+type Router struct {
+	// router.Assets
+	// router.API
+}
 
+var (
+	assets router.Assets = router.Assets{}
+	api router.API = router.API{}
+)
+
+func init(){
+	mysql.SetupDB()
+	pkg.Store.SetupStore()
+	service.InitRootAdmin()
+}
 
 func main() {
 	port := 8080
 	r := mux.NewRouter()
-
-	mysql.SetupDB()
-	session.SetupStore()
-	err := admin.MakeRootAdmin()
-	if err != nil {
-		return
-	}
+	
 	r.Use(corsMiddleware)
-	root.RegisterHandlers(r.PathPrefix("/api").Subrouter())
-	assets.RegisterHandlers(r.PathPrefix("/assets").Subrouter())
+
+	api.Router(r.PathPrefix("/api").Subrouter())
+	assets.Router(r.PathPrefix("/assets").Subrouter())
+
 	log.Println("Prism Server Starting on Port :", port)
 	
 	// 라우터에 CORS 미들웨어 추가

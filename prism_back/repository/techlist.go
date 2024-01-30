@@ -40,6 +40,8 @@ func (t *TechRepository)ReadAll(tx *sql.Tx) ([]models.Tech, error) {
 	return techlist, nil
 }
 
+
+// Admin에서 기술 스택의 이름 변경
 func (t *TechRepository)Update(tx *sql.Tx, preData, newData models.Tech) (models.Tech, error) {
 	query := "UPDATE tech_list SET tech_name = ? WHERE tech_name = ?"
 	_, err := tx.Exec(query, preData.TechName)
@@ -50,10 +52,10 @@ func (t *TechRepository)Update(tx *sql.Tx, preData, newData models.Tech) (models
 	return newData, nil
 }
 
+// 기술 스택을 선택한 사람의 count 수정
 func (t *TechRepository)UpdateCount(tx *sql.Tx, tech models.Tech) (error){
-	count, err := t.GetTotalCount(tx, tech)
+	count, err := getTotalCount(tx, tech)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	query := "UPDATE tech_list SET count = ? WHERE tech_name = ?"
@@ -65,16 +67,14 @@ func (t *TechRepository)UpdateCount(tx *sql.Tx, tech models.Tech) (error){
 	return nil
 }
 
-// 이건 profile_has_tech_list 로 이동할 예정
-func (t *TechRepository)GetTotalCount(tx *sql.Tx, tech models.Tech) (count int, err error){
-	query := "SELECT COUNT(*) FROM profile_has_tech_list WHERE tech_list_Id = ?"
-	err = tx.QueryRow(query, tech.Id).Scan(&count)
+// 기술 스택의 이름에 해당하는 기술 스택 id 얻기
+func getTechId(tx *sql.Tx, name string) (int, error) {
+	var tech_id int
+	query := "SELECT id FROM tech_list WHERE tech_name = ?"
+	err := tx.QueryRow(query, name).Scan(&tech_id)
 	if err != nil {
 		tx.Rollback()
 		return 0, err
 	}
-	return count, nil
+	return tech_id, nil
 }
-// func (t *Tech) Delete(tx *sql.Tx) {
-// 	query := ""
-// }

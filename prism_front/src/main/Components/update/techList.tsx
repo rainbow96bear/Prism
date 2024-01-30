@@ -30,15 +30,16 @@ const TechList = () => {
 
   // 기존 기술 목록을 가져오기
   useEffect(() => {
-    dispatch(getTechList(user.user_id));
-  }, [dispatch, user.user_id]);
+    dispatch(getTechList(user.id));
+  }, [dispatch, user.id]);
 
   useEffect(() => {
     const getTechList = async () => {
       try {
-        const result = await axios.get("/profile/tech/name_list", {
+        const result = await axios.get("/users/profiles/techlist", {
           withCredentials: true,
         });
+        // name과 count가 같이 전달되기에 name만 뽑아쓰도록 하기
         setTechList(result.data);
       } catch (error) {
         console.error("techList 받아오는 중 에러 발생:", error);
@@ -136,8 +137,8 @@ const TechList = () => {
   };
 
   const saveTech = async (userTechList: TechData[]) => {
-    const result = await axios.post(
-      `/profile/update/techs/${user.user_id}`,
+    await axios.put(
+      `/users/profiles/techs/${user.id}`,
       {
         userTechList,
       },
@@ -145,7 +146,7 @@ const TechList = () => {
         withCredentials: true,
       }
     );
-    navigator(`/profile/${user.user_id}`);
+    navigator(`/profile/${user.id}`);
   };
 
   // 외부 클릭 이벤트 리스너 등록
@@ -190,9 +191,7 @@ const TechList = () => {
         )}
       </SearchContainer>
       <ButtonContainer>
-        <Button onClick={() => navigator(`/profile/${user.user_id}`)}>
-          취소
-        </Button>
+        <Button onClick={() => navigator(`/profile/${user.id}`)}>취소</Button>
         <Button
           onClick={() => {
             saveTech(userTechList);

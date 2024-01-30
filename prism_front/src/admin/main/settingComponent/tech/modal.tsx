@@ -30,7 +30,7 @@ const AddTechModal: React.FC<AddTechModalProps> = ({
     try {
       // Send a request to add a new entry
       const result = (
-        await axios.post("/admin/access/tech", newEntry, {
+        await axios.post("/admin/techs", newEntry, {
           withCredentials: true,
         })
       ).data;

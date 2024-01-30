@@ -13,12 +13,12 @@ const initialState: PersonalData = {
   hashtag: [],
 };
 
-export const getPersonalDate = createAsyncThunk<
+export const getPersonalData = createAsyncThunk<
   PersonalData,
   string | undefined
 >("personal_data", async (id) => {
   const response = await axios.get<PersonalData>(
-    `/profile/personaldata/${id}`,
+    `/users/profiles/personaldata/${id}`,
     {
       withCredentials: true,
     }
@@ -32,7 +32,7 @@ const personalDateSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getPersonalDate.fulfilled, (state, action) => {
+      .addCase(getPersonalData.fulfilled, (state, action) => {
         state.nickname = action.payload.nickname;
         state.one_line_introduce = action.payload.one_line_introduce;
         if (action.payload?.hashtag == undefined) {
@@ -41,7 +41,7 @@ const personalDateSlice = createSlice({
           state.hashtag = action.payload?.hashtag;
         }
       })
-      .addCase(getPersonalDate.rejected, (state, action) => {
+      .addCase(getPersonalData.rejected, (state, action) => {
         console.error("Error fetching user info:", action.error.message);
       });
   },

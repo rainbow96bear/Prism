@@ -19,7 +19,7 @@ const Root: React.FC<setAdmin_info> = ({ setAdmin_info }) => {
     try {
       const loginResult = (
         await axios.post(
-          "/admin/user/login",
+          "/admin/login",
           { password: password },
           {
             withCredentials: true,

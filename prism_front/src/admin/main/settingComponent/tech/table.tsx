@@ -35,7 +35,7 @@ const Table: React.FC<TableProps> = ({ column, info, getTechList }) => {
       // Axios로 서버에 저장 요청 보내기
       const result = (
         await axios.put(
-          "/admin/access/tech",
+          "/admin/techs",
           {
             editedValues: {
               Tech_code: editedValues?.Tech_code,

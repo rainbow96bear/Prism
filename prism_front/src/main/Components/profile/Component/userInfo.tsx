@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 
 import { AppDispatch, RootState } from "../../../../app/store";
-import { getPersonalDate } from "../../../../app/slices/profile/personal_data";
+import { getPersonalData } from "../../../../app/slices/profile/personal_data";
 import ProfileImage from "../../../../CustomComponent/ProfileImg";
 
 const UserInfo = () => {
@@ -18,7 +18,7 @@ const UserInfo = () => {
   };
   const { id } = useParams();
   useEffect(() => {
-    dispatch(getPersonalDate(id));
+    dispatch(getPersonalData(id));
   }, []);
 
   return (
@@ -40,7 +40,7 @@ const UserInfo = () => {
         </HashtagBox>
       </SubBox>
       <div>
-        {user.user_id == id ? (
+        {user.id == id ? (
           <button
             onClick={() => {
               move("/profile/update/userinfo");

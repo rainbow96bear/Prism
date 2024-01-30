@@ -40,6 +40,7 @@ func (h *HashtagRepository)Read(tx *sql.Tx, id string) (HashtagList []string, er
 	return HashtagList, nil
 }
 
+// repository - hashtaglist 테이블에 hashtag 수정
 func (h *HashtagRepository)Update(tx *sql.Tx, id string, hashtagArray []string) (hashtagList []models.Hashtag, err error){
 	// Delete 메서드로 id에 해당하는 hashtag 삭제
 	err = h.Delete(tx, id)

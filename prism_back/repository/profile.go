@@ -9,7 +9,7 @@ type ProfileRepository struct {
 	models.Profile
 }
 
-// profile 테이블에 user id와 profile id를 Insert
+// repository - profile 테이블에 user id와 profile id를 Insert
 func (p *ProfileRepository)Create(tx *sql.Tx, id string) (string, error) {
 	query := "INSERT INTO profile(id, user_info_User_id) VALUE(?, ?)"
 	_, err := tx.Exec(query, id, id)
@@ -20,7 +20,7 @@ func (p *ProfileRepository)Create(tx *sql.Tx, id string) (string, error) {
 	return id, nil
 }
 
-// profile 테이블에서 id에 해당하는 Profile 정보 얻기
+// repository - profile 테이블에서 id에 해당하는 Profile 정보 얻기
 func (p *ProfileRepository)Read(tx *sql.Tx, id string) (models.Profile, error) {
 	var profile models.Profile
 	query := "SELECT `id`, `One_line_introduce`, `user_info_User_id` FROM profile WHERE id = ?"
@@ -32,6 +32,7 @@ func (p *ProfileRepository)Read(tx *sql.Tx, id string) (models.Profile, error) {
 	return profile, err
 }
 
+// repository - profile 테이블에 한 줄 소개 수정
 func (p *ProfileRepository)Update(tx *sql.Tx, id, one_line_introduce string) (models.Profile, error) {
 	query := "UPDATE profile SET One_line_introduce WHERE id = ?"
 	_, err := tx.Exec(query, id)
@@ -43,6 +44,8 @@ func (p *ProfileRepository)Update(tx *sql.Tx, id, one_line_introduce string) (mo
 	return updatedProfile, nil
 }
 
+
+// repository - profile 테이블에 id에 해당하는 row 삭제
 func (p *ProfileRepository)Delete(tx *sql.Tx, id string) (string, error) {
 	query := "DELETE FROM profile WHERE id = ?"
 	_, err := tx.Exec(query, id)

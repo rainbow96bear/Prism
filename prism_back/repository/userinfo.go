@@ -23,6 +23,7 @@ func (u *UserInfoReopository)Create(tx *sql.Tx, userinfo models.UserInfo) (err e
 	}
 
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -41,14 +42,14 @@ func (u *UserInfoReopository)Read(tx *sql.Tx, id string) (models.UserInfo, error
 	return userinfo, nil
 }
 
-func (u *UserInfoReopository)Update(tx *sql.Tx, userinfo models.UserInfo) (models.UserInfo, error){
+func (u *UserInfoReopository)Update(tx *sql.Tx, id, nickname string) (models.UserInfo, error){
 	query := "UPDATE user_info SET Nickname = ? WHERE user_id = ?"
-	_, err := tx.Exec(query, userinfo.NickName, userinfo.Id)
+	_, err := tx.Exec(query, nickname, id)
 	if err != nil {
 		tx.Rollback()
 		return models.UserInfo{}, err
 	}
-	return userinfo, nil
+	return models.UserInfo{Id: id, NickName: nickname}, nil
 }
 
 // DELETE는 CASECADE 적용 후 추가 작성
