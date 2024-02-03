@@ -23,10 +23,11 @@ const Tech = () => {
   };
   const getTechList = async () => {
     const list = (
-      await axios.get("/admin/access/tech", {
+      await axios.get("/admins/techs", {
         withCredentials: true,
       })
     ).data;
+    console.log(list);
     setInfo(list);
     setSortedInfo(list);
   };
@@ -79,7 +80,6 @@ const Tech = () => {
     });
     setSortedInfo(filteredInfo);
   };
-
   return (
     <Box>
       <FuncBar>

@@ -15,10 +15,11 @@ type AdminsHandler struct {
 
 // admin handler
 func (a *AdminsHandler)RegisterHandlers(r *mux.Router) {
+	r.HandleFunc("/authorization", a.Admin.CheckAuthorization).Methods("GET")
 	r.HandleFunc("/login", a.Admin.Login).Methods("POST")
 	r.HandleFunc("/logout", a.Admin.Logout).Methods("POST")
 
 	r.HandleFunc("/techs", a.Techs.GetTechList).Methods("GET")
 	r.HandleFunc("/techs", a.AdminsMiddleware.CheckAccess(a.Techs.AddTechForAdmin)).Methods("POST")
-	r.HandleFunc("/techs/{id}", a.AdminsMiddleware.CheckAccess(a.Techs.AddTechForAdmin)).Methods("PUT")
+	r.HandleFunc("/techs/{id}", a.AdminsMiddleware.CheckAccess(a.Techs.UpdateTech)).Methods("PUT")
 }

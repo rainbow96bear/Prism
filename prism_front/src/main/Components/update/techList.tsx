@@ -2,13 +2,10 @@ import React, { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../app/store";
 import { useSelector } from "react-redux";
-import {
-  getTechList,
-  setTechList,
-} from "../../../app/slices/profile/tech_data";
+import { getUserTechList } from "../../../app/slices/profile/tech_data";
 import TechItem from "./TechListComponent/techItem";
 import styled from "styled-components";
-import { TechData } from "../../../GlobalType/Tech";
+import { TechData, TechInfo } from "../../../GlobalType/Tech";
 import { useNavigate } from "react-router";
 import axios from "../../../configs/AxiosConfig";
 
@@ -21,7 +18,7 @@ const TechList = () => {
     user_tech_list.tech_list ?? []
   );
 
-  const [techList, setTechList] = useState<string[]>([]);
+  const [techList, setTechList] = useState<TechInfo[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [selectedResultIndex, setSelectedResultIndex] = useState(-1);
@@ -30,7 +27,7 @@ const TechList = () => {
 
   // 기존 기술 목록을 가져오기
   useEffect(() => {
-    dispatch(getTechList(user.id));
+    dispatch(getUserTechList(user.id));
   }, [dispatch, user.id]);
 
   useEffect(() => {
@@ -54,9 +51,11 @@ const TechList = () => {
     setSearchTerm(value);
 
     // 검색어에 따라 결과 필터링
-    const filteredResults = techList.filter((tech) =>
-      tech.toLowerCase().includes(value.toLowerCase())
-    );
+    const filteredResults = techList
+      .filter((tech) =>
+        tech?.tech_name?.toLowerCase().includes(value.toLowerCase())
+      )
+      .map((tech) => tech.tech_name || ""); // 추출된 기술명들로 이루어진 배열을 생성
 
     setSearchResults(filteredResults);
     setSelectedResultIndex(-1);
@@ -138,10 +137,10 @@ const TechList = () => {
 
   const saveTech = async (userTechList: TechData[]) => {
     await axios.put(
-      `/users/profiles/techs/${user.id}`,
-      {
-        userTechList,
-      },
+      `/users/profiles/${user.id}/techs`,
+
+      userTechList,
+
       {
         withCredentials: true,
       }

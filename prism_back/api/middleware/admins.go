@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 	"os"
-	"prism_back/pkg"
+	"prism_back/internal/session"
 )
 
 var (
@@ -11,12 +11,11 @@ var (
 )
 
 type AdminsMiddleware struct {
-	pkg.Session
 }
 
 func (a *AdminsMiddleware)CheckAccess(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		admin_id, err := a.Session.GetID(adminSession, req)
+		admin_id, err := session.GetID(adminSession, req)
 		
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusInternalServerError)

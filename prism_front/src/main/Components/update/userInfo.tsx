@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import HashTagItem from "./HashtagComponent/hashtagItem";
 import HashTagInput from "./HashtagComponent/hashtagInput";
 import ProfileImage from "../../../CustomComponent/ProfileImg";
-import { getProfile } from "../../../app/slices/user/user";
+import { getUserInfo } from "../../../app/slices/user/user";
 
 const UserInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -25,21 +25,21 @@ const UserInfo = () => {
 
   useEffect(() => {
     if (user.id) {
-      dispatch(getPersonalData(user.id));
-      setOneLineIntroduce(personalDate.one_line_introduce);
+      dispatch(getUserInfo());
+      setOneLineIntroduce(personalDate.oneLineIntroduce);
       setNickname(personalDate.nickname);
     }
   }, [dispatch, user.id]);
 
   useEffect(() => {
     if (personalDate.nickname) {
-      setOneLineIntroduce(personalDate.one_line_introduce);
+      setOneLineIntroduce(personalDate.oneLineIntroduce);
       setNickname(personalDate.nickname);
     }
   }, [dispatch, personalDate.nickname]);
 
   useEffect(() => {
-    dispatch(getProfile());
+    dispatch(getUserInfo());
   }, [dispatch]);
 
   const handleNicknameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +94,7 @@ const UserInfo = () => {
       formData.append("hashtags", hashtagsJsonString);
 
       const response = await axios.put(
-        `/users/profiles/personaldatas/${user.id}`,
+        `/users/profiles/${user.id}/personaldatas`,
         formData,
         {
           withCredentials: true,
@@ -154,7 +154,7 @@ const UserInfo = () => {
           type="text"
           value={
             one_line_introduce == undefined
-              ? personalDate.one_line_introduce
+              ? personalDate.oneLineIntroduce
               : one_line_introduce
           }
           onChange={handleIntroduceChange}

@@ -17,7 +17,6 @@ type Techs struct {
 	repository.TechRepository
 }
 
-
 // 사용자 profile에 출력할 사용자의 tech 목록 얻기
 func (t *Techs) GetUserTechList(res http.ResponseWriter, req *http.Request){
 	vars := mux.Vars(req)
@@ -26,6 +25,7 @@ func (t *Techs) GetUserTechList(res http.ResponseWriter, req *http.Request){
 	tx, err := mysql.DB.Begin()
 	if err != nil {
 		log.Println("service/techs.go :", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -33,6 +33,7 @@ func (t *Techs) GetUserTechList(res http.ResponseWriter, req *http.Request){
 	techList, err := t.ProfileHasTechListRepository.GetUserTechList(tx, id)
 	if err != nil {
 		log.Println("service/techs.go :", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -40,16 +41,17 @@ func (t *Techs) GetUserTechList(res http.ResponseWriter, req *http.Request){
 	err = tx.Commit()
 	if err != nil {
 		log.Println("service/techs.go :", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 	}
-
+	
 	responseJSON, err := json.Marshal(techList)
 	if err != nil {
 		log.Println("service/techs.go : json marshal 오류", err)
 		return
 	}
 
-	res.Header().Set("Content/type", "application/json")
+	res.Header().Set("Content-Type", "application/json")
 	res.Write(responseJSON)
 }
 
@@ -58,19 +60,21 @@ func (t *Techs)GetTechList(res http.ResponseWriter, req *http.Request) {
 	tx, err := mysql.DB.Begin()
 	if err != nil {
 		log.Println("service/techs.go :", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	techList, err := t.TechRepository.ReadAll(tx)
 	if err != nil {
 		log.Println("service/techs.go :", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	
 	dtoTechList := []dto.Tech{}
 	for _, value := range techList {
-		dtoTechList = append(dtoTechList, dto.Tech{Name: value.TechName, Count:value.Count})
+		dtoTechList = append(dtoTechList, dto.Tech{Id : value.Id, Name: value.TechName, Count:value.Count})
 	}
 
 	responseJSON, err := json.Marshal(dtoTechList)
@@ -89,6 +93,7 @@ func (t *Techs)AddTechForAdmin(res http.ResponseWriter, req *http.Request) {
 	tx, err := mysql.DB.Begin()
 	if err != nil {
 		log.Println("service/techs.go :", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -105,6 +110,7 @@ func (t *Techs)AddTechForAdmin(res http.ResponseWriter, req *http.Request) {
 	err = t.TechRepository.Create(tx, tech.Name)
 	if err != nil {
 		log.Println("service/techs.go :", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -112,9 +118,57 @@ func (t *Techs)AddTechForAdmin(res http.ResponseWriter, req *http.Request) {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("service/techs.go :", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+}
+
+// Admin이 Tech의 목록에 기술 스택 수정
+func (t *Techs)UpdateTech(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	id:= vars["id"]
+
+	tx, err := mysql.DB.Begin()
+	if err != nil {
+		log.Println("service/techs.go DB 시작 오류:", err)
+		tx.Rollback()
+		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	
+	body, err := io.ReadAll(req.Body)
+	var tech dto.Tech
+	err = json.Unmarshal(body, &tech)
+	if err != nil {
+		log.Println("service/techs.go req Unmarshal 오류:", err)
+		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		return
+	} 
+
+	err = t.TechRepository.Update(tx, id, tech.Name)
+	if err != nil {
+		log.Println("service/techs.go DB 수정 오류 :", err)
+		tx.Rollback()
+		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Println("service/techs.go commit 오류:", err)
+		tx.Rollback()
+		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	responseJSON, err := json.Marshal(dto.Tech{Id: tech.Id, Name: tech.Name})
+	if err != nil {
+		log.Println("service/techs.go 수정 결과 Marshal 오류:", err)
+		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	res.Header().Set("Content-Type", "application/json")
+	res.Write(responseJSON)
 }
 
 // User의 기술 스택 수정
@@ -123,23 +177,26 @@ func (t *Techs)UpdateUserTechList(res http.ResponseWriter, req *http.Request) {
 	id := vars["id"]
 
 	body, err := io.ReadAll(req.Body)
+
 	var userTechList []dto.UserTech
 	err = json.Unmarshal(body, &userTechList)
 	if err != nil {
-		log.Println("service/techs.go :", err)
+		log.Println("service/techs.go : Unmarshal 오류", err)
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	} 
 	tx, err := mysql.DB.Begin()
 	if err != nil {
-		log.Println("service/techs.go :", err)
+		log.Println("service/techs.go : DB 트랜잭션 시작 오류", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	err = t.ProfileHasTechListRepository.Delete(tx, id)
 	if err != nil {
-		log.Println("service/techs.go :", err)
+		log.Println("service/techs.go : TechList 삭제 오류", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -147,10 +204,19 @@ func (t *Techs)UpdateUserTechList(res http.ResponseWriter, req *http.Request) {
 	for _, value := range userTechList{
 		err := t.ProfileHasTechListRepository.Create(tx, id, value.Name, value.Level)
 		if err != nil {
-			log.Println("service/techs.go :", err)
+			log.Println("service/techs.go : TechList 생성 오류", err)
+			tx.Rollback()
 			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Println("service/techs.go commit 오류:", err)
+		tx.Rollback()
+		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 	
 }

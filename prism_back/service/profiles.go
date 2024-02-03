@@ -8,15 +8,12 @@ import (
 	"net/http"
 	"os"
 	"prism_back/dto"
+	"prism_back/errors"
 	"prism_back/internal/Database/mysql"
 	"prism_back/pkg"
 	"prism_back/repository"
 
 	"github.com/gorilla/mux"
-)
-
-var (
-	profileFolder = os.Getenv("PROFILE_IMAGE_FOLDER")
 )
 
 type Profile struct {
@@ -33,27 +30,31 @@ func (p *Profile)GetUserProfile(res http.ResponseWriter, req *http.Request) {
 	tx, err := mysql.DB.Begin()
 	if err != nil {
 		log.Println("service/profiles.go : DB Begin 오류", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	
 	nickname, err := p.getNickname(tx, id)
 	if err != nil {
-		log.Println("service/profiles.go :", err)
+		log.Println("service/profiles.go : 닉네임 얻기 오류", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	one_line_introduce, err := p.getOneLineIntroduce(tx, id)
 	if err != nil {
-		log.Println("service/profiles.go :", err)
+		log.Println("service/profiles.go : 한 줄 소개 얻기 오류", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	hashtagList, err := p.getHashtag(tx, id)
 	if err != nil {
-		log.Println("service/profiles.go :", err)
+		log.Println("service/profiles.go : 해시태그 얻기 오류", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -82,34 +83,38 @@ func (p *Profile)UpdateUserProfile(res http.ResponseWriter, req *http.Request) {
 	tx, err := mysql.DB.Begin()
 	if err != nil {
 		log.Println("service/profiles.go :", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	dto, err := p.getProfileDataFromReq(req)
 	if err != nil {
-		log.Println("service/profiles.go :", err)
+		log.Println("service/profiles.go : req에서 profile 내용 얻기 오류", err)
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	_, err = p.userinfo.Update(tx, id, dto.Nickname)
 	if err != nil {
-		log.Println("service/profiles.go :", err)
+		log.Println("service/profiles.go : profile 닉네임 업데이트 오류", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	
 	_, err = p.profile.Update(tx, id, dto.One_line_introduce)
 	if err != nil {
-		log.Println("service/profiles.go :", err)
+		log.Println("service/profiles.go : profile 한 줄 소개 업데이트 오류", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	
 	_, err = p.hashtag.Update(tx, id, dto.Hashtag)
 	if err != nil {
-		log.Println("service/profiles.go :", err)
+		log.Println("service/profiles.go : profile 해시태그 업데이트 오류", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -117,13 +122,14 @@ func (p *Profile)UpdateUserProfile(res http.ResponseWriter, req *http.Request) {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("service/profiles.go: DB 트랜잭션 커밋 오류", err)
+		tx.Rollback()
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	
 	err = p.uploadProfileImg(req, id)
-	if err != nil {
-		log.Println("service/profiles.go :", err)
+	if err != nil && err != errors.EmptyFile {
+		log.Println("service/profiles.go : profile 이미지 업데이트 오류", err)
 		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -136,7 +142,7 @@ func (p *Profile)UpdateUserProfile(res http.ResponseWriter, req *http.Request) {
 // service - repository에 요청하여 id에 해당하는 nickname 얻기
 func (p *Profile)getNickname(tx *sql.Tx, id string) (string, error){
 	userinfo, err := p.userinfo.Read(tx, id)
-	if err != nil {
+	if err != nil && err != errors.NotSavedUser{
 		return "", fmt.Errorf("Nickname 얻기 실패 %e", err)
 	}
 	return userinfo.NickName, nil
@@ -183,28 +189,24 @@ func (p *Profile)getProfileDataFromReq(req *http.Request) (dto.Personaldata, err
 
 func (p *Profile)uploadProfileImg(req *http.Request, id string) (error) {
 	fileName := fmt.Sprintf("%s%s", id, os.Getenv("PROFILE_IMAGE_EXTENSION"))
-
 	file, handler, err := p.images.GetImageFromReq(req)
-	if err != nil {
+	if err != nil{
+		if err == errors.EmptyFile {
+			return err
+		}
 		return fmt.Errorf("Req에서 image 파일 얻기 오류 %e", err)
 	}
-	defer file.Close()
-
+	
 	image, err := p.images.ResizingForProfile(handler, file)
 	if err != nil {
 		return fmt.Errorf("resizing 오류 %e", err)
 	}
 
-	// newFile, err := p.images.CreateNewImageFile(profileFolder, fileName)
-	// if err != nil {
-	// 	return fmt.Errorf("새 image file 생성 오류 %e", err)
-	// }
-	// defer newFile.Close()
-
 	err = p.images.EncodeForJPEG(profileFolder, fileName, image)
 	if err != nil {
 		return fmt.Errorf("JEPG로 Encode 오류 %e", err)
 	}
-
+	
+	defer file.Close()
 	return nil
 }

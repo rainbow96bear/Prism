@@ -5,7 +5,7 @@ import { AppDispatch, RootState } from "../../../../app/store";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
 import { useEffect } from "react";
-import { getTechList } from "../../../../app/slices/profile/tech_data";
+import { getUserTechList } from "../../../../app/slices/profile/tech_data";
 const TechStack = () => {
   const { id } = useParams();
 
@@ -17,13 +17,14 @@ const TechStack = () => {
   const navigator = useNavigate();
 
   useEffect(() => {
-    dispatch(getTechList(id));
-  }, []);
+    dispatch(getUserTechList(id));
+  }, [id, dispatch]);
+
   return (
     <Container>
       <TitleBox>
         <Title>기술 스택</Title>
-        {user.user_id == id && (
+        {user.id == id && (
           <button
             onClick={() => {
               navigator("/profile/update/techlist");

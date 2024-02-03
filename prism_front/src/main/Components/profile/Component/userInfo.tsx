@@ -20,16 +20,15 @@ const UserInfo = () => {
   useEffect(() => {
     dispatch(getPersonalData(id));
   }, []);
-
   return (
     <Container>
       <ProfileImage id={id != undefined ? id : "default"}></ProfileImage>
       <SubBox>
         <div className="nickname">{personalDate.nickname}</div>
         <div className="oneLineIntroduce">
-          {personalDate.one_line_introduce == ""
+          {personalDate.oneLineIntroduce == ""
             ? "한 줄 소개"
-            : personalDate.one_line_introduce}
+            : personalDate.oneLineIntroduce}
         </div>
         <HashtagBox>
           {personalDate?.hashtag?.map((value, index) => (

@@ -3,13 +3,13 @@ import axios from "../../../configs/AxiosConfig";
 
 interface PersonalData {
   nickname: string;
-  one_line_introduce: string;
+  oneLineIntroduce: string;
   hashtag: string[];
 }
 
 const initialState: PersonalData = {
   nickname: "",
-  one_line_introduce: "",
+  oneLineIntroduce: "",
   hashtag: [],
 };
 
@@ -18,7 +18,7 @@ export const getPersonalData = createAsyncThunk<
   string | undefined
 >("personal_data", async (id) => {
   const response = await axios.get<PersonalData>(
-    `/users/profiles/personaldata/${id}`,
+    `/users/profiles/${id}/personaldatas`,
     {
       withCredentials: true,
     }
@@ -34,7 +34,7 @@ const personalDateSlice = createSlice({
     builder
       .addCase(getPersonalData.fulfilled, (state, action) => {
         state.nickname = action.payload.nickname;
-        state.one_line_introduce = action.payload.one_line_introduce;
+        state.oneLineIntroduce = action.payload.oneLineIntroduce;
         if (action.payload?.hashtag == undefined) {
           state.hashtag = [];
         } else {

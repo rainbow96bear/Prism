@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,7 +12,9 @@ import (
 	"os"
 	"prism_back/dto"
 	"prism_back/dto/oauth"
+	"prism_back/errors"
 	"prism_back/internal/Database/mysql"
+	"prism_back/internal/session"
 	"prism_back/pkg"
 	"prism_back/pkg/models"
 	"prism_back/repository"
@@ -34,78 +37,87 @@ type KakaoOAuth struct {
 	oauth.KakaoToken
 	repository.UserInfoReopository
 	repository.ProfileRepository
-	pkg.Session
 	pkg.Images
 }
 
 func (k *KakaoOAuth) Login(res http.ResponseWriter, req *http.Request) {
 	token, err := getToken(req)
 	if err != nil {
-		log.Println("kakao OAuth token 얻기 오류", err)
-		http.Error(res, err.Error(), http.StatusInternalServerError)
+		log.Println("service/oauth.go : kakao OAuth token 얻기 오류", err)
+		http.Redirect(res, req, FRONT_URL, http.StatusInternalServerError)
 		return
 	}
-
 	userinfo, err := getUserInfo(token.Access_token)
 	if err != nil {
-		log.Println("kakao OAuth token 얻기 오류", err)
-		http.Error(res, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	isSaved, err := k.isSaved(userinfo.Id)
-	if err != nil {
-		log.Println("kakao OAuth token 얻기 오류", err)
-		http.Error(res, err.Error(), http.StatusInternalServerError)
+		log.Println("service/oauth.go : Access token으로 사용자 정보 얻기 오류", err)
+		http.Redirect(res, req, FRONT_URL, http.StatusInternalServerError)
 		return
 	}
 
 	tx, err := mysql.DB.Begin()
 	if err != nil {
-		log.Println("kakao OAuth token 얻기 오류", err)
-		http.Error(res, err.Error(), http.StatusInternalServerError)
+		log.Println("service/oauth.go : DB 시작 오류", err)
+		tx.Rollback()
+		http.Redirect(res, req, FRONT_URL, http.StatusInternalServerError)
 		return
 	}
 
+	isSaved, err := k.isSaved(tx, userinfo.Id)
+	if err != nil {
+		log.Println("service/oauth.go : 등록된 사용자 확인 오류", err)
+		http.Redirect(res, req, FRONT_URL, http.StatusInternalServerError)
+		return
+	}
+	
 	if !isSaved {
+		
 		// 사용자 정보 저장
 		err = k.UserInfoReopository.Create(tx, models.UserInfo{Id : userinfo.Id, NickName: userinfo.Nickname})
 		if err != nil {
-			log.Println("kakao OAuth token 얻기 오류", err)
-			http.Error(res, err.Error(), http.StatusInternalServerError)
+			log.Println("service/oauth.go : 사용자 정보 저장 오류", err)
+			tx.Rollback()
+			http.Redirect(res, req, FRONT_URL, http.StatusInternalServerError)
 			return
 		}
 
 		// 프로필 생성
 		_, err = k.ProfileRepository.Create(tx, userinfo.Id)
 		if err != nil {
-			log.Println("kakao OAuth token 얻기 오류", err)
-			http.Error(res, err.Error(), http.StatusInternalServerError)
+			log.Println("service/oauth.go : 사용자 프로필 생성 오류", err)
+			tx.Rollback()
+			http.Redirect(res, req, FRONT_URL, http.StatusInternalServerError)
 			return
 		}
-		
 		// 프로필 이미지 저장
 		err := k.Images.DownLoadImgFromURL(userinfo.ProfileImgURL, profilePath, userinfo.Id, profileImgExtension)
 		if err != nil {
-			log.Println("kakao OAuth token 얻기 오류", err)
-			http.Error(res, err.Error(), http.StatusInternalServerError)
+			log.Println("service/oauth.go : 사용자 프로필 이미지 저장 오류", err)
+			http.Redirect(res, req, FRONT_URL, http.StatusInternalServerError)
 			return
 		}
 	}
 
-	err = k.Session.CreateSession(userSession, userinfo.Id, res, req)
+	err = session.CreateUserSession(userSession, userinfo.Id, res, req)
 	if err != nil {
-		log.Println("kakao OAuth token 얻기 오류", err)
-		http.Error(res, err.Error(), http.StatusInternalServerError)
+		log.Println("service/oauth.go : 로그인 세션 생성 오류", err)
+		http.Redirect(res, req, FRONT_URL, http.StatusInternalServerError)
 		return
 	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Println("service/oauth.go :", err)
+		tx.Rollback()
+		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+	}
+
 	http.Redirect(res, req, fmt.Sprintf("%s/home", FRONT_URL), http.StatusFound)
 }
 
 func (k *KakaoOAuth)Logout(res http.ResponseWriter, req *http.Request) {
-	err := k.Session.DeleteSession(userSession, res, req)
+	err := session.DeleteSession(userSession, res, req)
 	if err != nil {
-		log.Println("kakao OAuth token 얻기 오류", err)
+		log.Println("로그인 세션 제거 오류", err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -113,7 +125,6 @@ func (k *KakaoOAuth)Logout(res http.ResponseWriter, req *http.Request) {
 
 func getToken(req *http.Request) (oauth.KakaoToken, error) {
 	code := req.URL.Query().Get("code")
-
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
 	data.Set("client_id", REST_API_KEY)
@@ -152,7 +163,7 @@ func getToken(req *http.Request) (oauth.KakaoToken, error) {
 
 func getUserInfo(AccessToken string) (dto.KakaoUser, error) {
 
-	var user dto.KakaoUser
+	user := dto.KakaoUser{}
 	// 요청 생성
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
@@ -178,17 +189,25 @@ func getUserInfo(AccessToken string) (dto.KakaoUser, error) {
 	if err != nil {
 		return user, fmt.Errorf("Unmarshal 오류 : %v\n", err)
 	}
-
+	
 	return user, nil
 }
 
-func (k *KakaoOAuth)isSaved(id string) (bool, error) {
-	tx, err := mysql.DB.Begin()
-	if err != nil {
+func (k *KakaoOAuth) isSaved(tx *sql.Tx , id string) (bool, error) {	
+	// UserInfoReopository를 통해 사용자 정보를 읽어옴
+	_, err := k.UserInfoReopository.Read(tx, id)
+	// 사용자 정보가 없는 경우 (errors.IsNotSavedUser 에러)
+	if err == errors.NotSavedUser {
+		// 트랜잭션 롤백 후 저장되지 않은 사용자로 판단
+		return false, nil
+	}else if err != nil {
+		// 사용자 정보를 읽어오는 도중 에러가 발생하면 트랜잭션 롤백 후 에러 반환
 		return false, err
 	}
-	_, err = k.UserInfoReopository.Read(tx, id)
+
+	// 사용자 정보가 있는 경우, 트랜잭션을 커밋하고 저장된 사용자로 판단
 	if err != nil {
+		log.Println("service/oauth.go tx commit error:", err)
 		return false, err
 	}
 	return true, nil

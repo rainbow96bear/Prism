@@ -7,7 +7,7 @@ import (
 	"os"
 	"prism_back/api/router"
 	"prism_back/internal/Database/mysql"
-	"prism_back/pkg"
+	"prism_back/internal/session"
 	"prism_back/service"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -26,7 +26,7 @@ var (
 
 func init(){
 	mysql.SetupDB()
-	pkg.Store.SetupStore()
+	session.SetupStore()
 	service.InitRootAdmin()
 }
 

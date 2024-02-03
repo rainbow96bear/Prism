@@ -4,31 +4,23 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 	"prism_back/dto"
 	"prism_back/errors"
 	"prism_back/internal/Database/mysql"
-	"prism_back/pkg"
+	"prism_back/internal/session"
 	"prism_back/repository"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-var (
-	adminSession string = os.Getenv("ADMIN_SESSION")
-	userSession string = os.Getenv("USER_SESSION")
-	rootAdminID string = os.Getenv("ROOT_ADMIN_ID")
-	rootAdminPassword string = os.Getenv("ROOT_ADMIN_PASSWORD")
-)
 type Admin struct {
-	pkg.Session
 	repository.AdminUserRepository
 }
 
 // admin 계정 로그인
 func (a *Admin) Login(res http.ResponseWriter, req *http.Request) {
 	// userSession으로 현제 로그인 사용자 확인
-	id, err := a.Session.GetID(userSession, req)
+	id, err := session.GetID(userSession, req)
 	if err != nil {
 		log.Println("service/admin.go : session 생성 실패", err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
@@ -38,22 +30,22 @@ func (a *Admin) Login(res http.ResponseWriter, req *http.Request) {
 	tx, err := mysql.DB.Begin()
 	if err != nil {
 		log.Println("DB 시작 오류", err)
+		tx.Rollback()
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return 
 	}
 	
-	var adminResult dto.AdminLoginResult
-	adminInfo, err := a.AdminUserRepository.GetAdminUserInfo(tx, id)
+	var adminInfo dto.AdminInfo
+	adminUserInfo, err := a.AdminUserRepository.GetAdminUserInfo(tx, id)
 	if err != nil {
 		if err == errors.IsNotAdminUser {
 			log.Println("관리자 계정이 아닌 사용자 접근", id)
 		}else {
 			log.Println("DB에서 정보 획득 실패", err)
+			tx.Rollback()
 		}
-		adminResult.Result = false
-		adminResult.IsAdmin = false
-		adminResult.AdminInfo = dto.AdminInfo{Id : "", Rank : 0}
-		jsonResponse, err := json.Marshal(adminResult)
+		adminInfo = dto.AdminInfo{Id : "", Rank : 0}
+		jsonResponse, err := json.Marshal(adminInfo)
 		if err != nil {
 			log.Println("Admin 로그인 결과 Marshal 오류", err)
 			http.Error(res, err.Error(), http.StatusInternalServerError)
@@ -66,12 +58,11 @@ func (a *Admin) Login(res http.ResponseWriter, req *http.Request) {
 	
 	err = tx.Commit()
 	if err != nil {
-		adminResult.Result = false
-		adminResult.IsAdmin = false
-		adminResult.AdminInfo = dto.AdminInfo{Id : "", Rank : 0}
-		jsonResponse, err := json.Marshal(adminResult)
+		adminInfo = dto.AdminInfo{Id : "", Rank : 0}
+		jsonResponse, err := json.Marshal(adminInfo)
 		if err != nil {
 			log.Println("tx Commit 오류", err)
+			tx.Rollback()
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return 
 		}
@@ -87,11 +78,9 @@ func (a *Admin) Login(res http.ResponseWriter, req *http.Request) {
 		return 
 	}
 
-	if comparePassword(adminInfo.Password, reqPassword) {
-		adminResult.Result = false
-		adminResult.IsAdmin = true
-		adminResult.AdminInfo = dto.AdminInfo{Id : "", Rank : 0}
-		jsonResponse, err := json.Marshal(adminResult)
+	if !comparePassword(adminUserInfo.Password, reqPassword) {
+		adminInfo = dto.AdminInfo{Id : "", Rank : 0}
+		jsonResponse, err := json.Marshal(adminInfo)
 		if err != nil {
 			log.Println("Admin 로그인 결과 Marshal 오류", err)
 			http.Error(res, err.Error(), http.StatusInternalServerError)
@@ -101,25 +90,89 @@ func (a *Admin) Login(res http.ResponseWriter, req *http.Request) {
 		res.Write(jsonResponse)
 		return 
 	}
-
-	adminResult.Result = true
-	adminResult.IsAdmin = true
-	adminResult.AdminInfo = dto.AdminInfo{Id : adminInfo.Id, Rank : adminInfo.Rank}
-	jsonResponse, err := json.Marshal(adminResult)
+	
+	adminInfo = dto.AdminInfo{Id : adminUserInfo.Id, Rank : adminUserInfo.Rank}
+	jsonResponse, err := json.Marshal(adminInfo)
 	if err != nil {
-		log.Println("Admin 로그인 결과 Marshal 오류", err)
+		log.Println("service/admin.go : Admin 로그인 결과 Marshal 오류", err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return 
 	}
+
+	err = session.CreateAdminSession(adminSession, id, adminInfo.Rank, res, req)
+	if err != nil {
+		log.Println("service/admin.go : Admin session 생성 오류", err)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return 
+	}
+
 	res.Header().Set("Content-Type", "application/json")
 	res.Write(jsonResponse)
 }
 
 // admin 계정 로그아웃
 func (a *Admin)Logout(res http.ResponseWriter, req *http.Request) {
-	a.Session.DeleteSession(adminSession, res, req)
+	session.DeleteSession(adminSession, res, req)
 }
 
+// admin 계정 확인
+func (a *Admin) CheckAuthorization(res http.ResponseWriter, req *http.Request){
+	authorization := dto.AdminAuthorization{IsAdmin: false, AdminInfo: dto.AdminInfo{Id: "", Rank: 0}}
+	adminID, err := session.GetID(adminSession, req)
+	rank, err := session.GetRank(adminSession, req)
+	if err != nil {
+		log.Println("service/admin.go : session 확인 오류", err)
+		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	if adminID != "" {
+		authorization.IsAdmin = true
+		authorization.AdminInfo.Id=adminID
+		authorization.AdminInfo.Rank = rank
+	}else {
+		id, err := session.GetID(userSession, req)
+		if err != nil {
+			log.Println("service/admin.go : session 확인 오류", err)
+			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		tx, err := mysql.DB.Begin()
+		if err != nil {
+			log.Println("service/admin.go : DB 시작 오류", err)
+			tx.Rollback()
+			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		
+		_, getAdminUserInfoErr := a.AdminUserRepository.GetAdminUserInfo(tx, id)
+		if getAdminUserInfoErr != nil && getAdminUserInfoErr != errors.IsNotAdminUser{
+			log.Println("service/techs.go : admin 정보 얻기 오류", err)
+			tx.Rollback()
+			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		}
+		
+		err = tx.Commit()
+		if err != nil {
+			log.Println("service/techs.go : commit 오류", err)
+			tx.Rollback()
+			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		}
+
+		if getAdminUserInfoErr != errors.IsNotAdminUser {
+			authorization.IsAdmin = true
+		}
+	}
+	jsonResponse, err := json.Marshal(authorization)
+	if err != nil {
+		log.Println("service/admin.go : Admin 로그인 결과 Marshal 오류", err)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return 
+	}
+	res.Header().Set("Content-Type", "application/json")
+	res.Write(jsonResponse)
+
+}
 // 비밀번호 비교
 func comparePassword(DBPassword, requestPassword string) (bool) {
 	err := bcrypt.CompareHashAndPassword([]byte(DBPassword), []byte(requestPassword))
@@ -151,7 +204,7 @@ func InitRootAdmin() {
 	}
 	adminRepo := repository.AdminUserRepository{}
 	adminInfo, err := adminRepo.GetAdminUserInfo(tx, rootAdminID)
-	if err != nil {
+	if err != nil && err != errors.IsNotAdminUser{
 		log.Fatal("DB에서 admin 정보 확인 오류", err)
 		return
 	}
@@ -166,7 +219,7 @@ func InitRootAdmin() {
 		return
 	}
 
-	err = adminRepo.CreateRootAdmin(tx, rootAdminID, string(hashedPassword))
+	err = adminRepo.CreateAdmin(tx, rootAdminID, string(hashedPassword), adminRank)
 	if err != nil {
 		log.Fatal("RootAdmin 계정 생성 실패", err)
 		return
@@ -177,5 +230,6 @@ func InitRootAdmin() {
 		log.Fatal("Root 관리자 계정 생성 실패", err)
 		return
 	}
+	log.Println("계정이 생성되었습니다. 비밀번호 : ", string(hashedPassword))
 	return 
 }

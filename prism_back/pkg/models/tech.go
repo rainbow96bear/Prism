@@ -1,7 +1,7 @@
 package models
 
 type Tech struct {
-	Id       string
+	Id       int
 	TechName string
 	Count    int
 }

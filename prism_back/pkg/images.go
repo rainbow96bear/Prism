@@ -11,11 +11,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"prism_back/errors"
 
 	"github.com/nfnt/resize"
 )
 var (
-	profileImgWidth uint = 300
+	profileImgWidth uint = 200
+	profileImgHeight uint = 200
 	assetsFolder = os.Getenv("RELATIVE_IMAGE_DIRECTORY")
 
 )
@@ -25,16 +27,18 @@ type Images struct {
 }
 
 // formdata에서 images로 전달 받은 파일을 얻기
-func (i *Images)GetImageFromReq(req *http.Request) (multipart.File, *multipart.FileHeader, error) {
-	file, handler, err := req.FormFile("imgaes")
+func (i *Images) GetImageFromReq(req *http.Request) (multipart.File, *multipart.FileHeader, error) {
+	file, handler, err := req.FormFile("image")
 	if err != nil {
-		
+		if err ==  http.ErrMissingFile {
+			return nil, nil, errors.EmptyFile
+		}
 		return nil, nil, err
 	}
-	defer file.Close()
 
 	return file, handler, nil
 }
+
 
 // filePath에 fileName이른을 가지는 파일을 생성
 func (i *Images)CreateNewImageFile(filePath, fileName string) (*os.File, error) {
@@ -61,6 +65,7 @@ func (i *Images)ResizingForProfile(handler *multipart.FileHeader, srcFile io.Rea
 		img image.Image
 		err error
 	)
+
 	if filepath.Ext(handler.Filename) == ".png" {
 		img, err = png.Decode(srcFile)
 		if err != nil {
@@ -72,8 +77,10 @@ func (i *Images)ResizingForProfile(handler *multipart.FileHeader, srcFile io.Rea
 			return nil, err
 		}
 	}
-	resizedImg := resize.Resize(profileImgWidth, 0, img, resize.Lanczos3)
 
+	// resizedImg := resize.Resize(profileImgWidth, profileImgWidth, img, resize.Lanczos3)
+	resizedImg := resize.Thumbnail(profileImgWidth, profileImgHeight, img, resize.Lanczos3)
+	
 	return resizedImg, nil
 }
 
@@ -102,7 +109,8 @@ func (i *Images)DownLoadImgFromURL(url, filePath, fileName, extension string) (e
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("HTTP 요청이 실패했습니다. 상태 코드: %d", response.StatusCode)
 	}
-	file, err := i.CreateNewImageFile(filePath, fileName)
+	newFileName := fmt.Sprintf("%s%s", fileName, extension)
+	file, err := i.CreateNewImageFile(filePath, newFileName)
 	if err != nil {
 		return err
 	}

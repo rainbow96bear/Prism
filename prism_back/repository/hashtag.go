@@ -12,7 +12,6 @@ type HashtagRepository struct {
 func (h *HashtagRepository)Create(tx *sql.Tx, id, hashtag string) (string, error) {
 	_, err := tx.Exec("INSERT INTO hashtag_list(profile_Id, hashtag) VALUES(?, ?)", id, hashtag)
 	if err != nil {
-		tx.Rollback()
 		return "", err
 	}
 	return hashtag, nil
@@ -23,7 +22,6 @@ func (h *HashtagRepository)Read(tx *sql.Tx, id string) (HashtagList []string, er
 	query := "SELECT hashtag FROM hashtag_list WHERE profile_Id = ?"
 	rows, err := tx.Query(query, id)
 	if err != nil {
-		tx.Rollback()
 		return HashtagList, err
 	}
 	defer rows.Close()
@@ -32,7 +30,6 @@ func (h *HashtagRepository)Read(tx *sql.Tx, id string) (HashtagList []string, er
 	for rows.Next() {
 		var hashtag string
 		if err := rows.Scan(&hashtag); err != nil {
-			tx.Rollback()
 			return HashtagList, err
 		}
 		HashtagList = append(HashtagList,hashtag)
@@ -52,7 +49,6 @@ func (h *HashtagRepository)Update(tx *sql.Tx, id string, hashtagArray []string) 
 	for _, hashtag := range hashtagArray {
 		_, err := tx.Exec("INSERT INTO hashtag_list(profile_Id, hashtag) VALUES(?, ?)", id, hashtag)
 		if err != nil {
-			tx.Rollback()
 			return []models.Hashtag{}, err
 		}
 	}
@@ -63,7 +59,6 @@ func (h *HashtagRepository)Delete(tx *sql.Tx, id string) (err error){
 	query := "DELETE FROM hashtag_list WHERE profile_Id = ?"
 	_, err = tx.Exec(query, id)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	return nil

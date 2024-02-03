@@ -14,7 +14,7 @@ const Home: React.FC<HomeProps> = ({ admin_info }) => {
   const logout = async () => {
     try {
       await axios.post(
-        "/admin/logout",
+        "/admins/logout",
         {},
         {
           withCredentials: true,
