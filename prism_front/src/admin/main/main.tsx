@@ -20,24 +20,22 @@ const AdminMain = () => {
     const checkAdmin = async () => {
       try {
         const checkResult = (
-          await axios.get("/admin/user/status", {
+          await axios.get("/admins/authorization", {
             withCredentials: true,
           })
         ).data;
         if (checkResult?.isAdmin == false) {
           navigate("/");
-        }
-        if (checkResult?.admin_info.id == "") {
+        } else if (checkResult?.admin_info.id == "") {
           navigate("/admin");
-        }
-        setAdmin_info(checkResult?.admin_info);
-        if (checkResult?.admin_info.id != "") {
+        } else if (checkResult?.admin_info.id != "") {
           if (originURL == "/admin") {
             navigate("/admin/home");
           } else {
             navigate(originURL);
           }
         }
+        setAdmin_info(checkResult?.admin_info);
         setIsAdmin(checkResult?.isAdmin);
       } catch (error) {
         console.error("Admin 확인 중 에러 발생:", error);

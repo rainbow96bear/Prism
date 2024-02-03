@@ -27,21 +27,16 @@ const Table: React.FC<TableProps> = ({ column, info, getTechList }) => {
       setEditingRowIndex(null);
     }
   };
-
   const handleSave = async (rowIndex: number) => {
     try {
-      // "Tech_code"와 "Tech_name" 키만 추출
-
       // Axios로 서버에 저장 요청 보내기
       const result = (
         await axios.put(
-          "/admin/access/tech",
+          `/admins/techs/${rowIndex + 1}`,
           {
-            editedValues: {
-              Tech_code: editedValues?.Tech_code,
-              Tech_name: editedValues?.Tech_name,
-            },
-            existingData: info[rowIndex],
+            tech_code: rowIndex + 1,
+            tech_name: editedValues?.tech_name,
+            count: 0,
           },
           {
             withCredentials: true,
@@ -50,9 +45,9 @@ const Table: React.FC<TableProps> = ({ column, info, getTechList }) => {
       ).data;
       alert(
         "코드 번호 : " +
-          result?.Tech_code +
+          result?.tech_code +
           ", 기술명 : " +
-          result?.Tech_name +
+          result?.tech_name +
           "저장 완료"
       );
       // 서버에서 응답이 성공인 경우 상태 업데이트
@@ -99,15 +94,15 @@ const Table: React.FC<TableProps> = ({ column, info, getTechList }) => {
             {Object.keys(row).map((key: any, cellIndex) => (
               <td key={cellIndex}>
                 {editingRowIndex === rowIndex ? (
-                  key === "Count" ? (
-                    // Count는 입력란 대신 텍스트로 출력
-                    row[key]
-                  ) : (
+                  key === "tech_name" ? (
                     <input
                       type="text"
                       defaultValue={String(row[key])}
                       onChange={(e) => handleChange(e, key)}
                     />
+                  ) : (
+                    // Count는 입력란 대신 텍스트로 출력
+                    row[key]
                   )
                 ) : (
                   row[key]

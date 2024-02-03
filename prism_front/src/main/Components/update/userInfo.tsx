@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 
 import axios from "./../../../configs/AxiosConfig";
 import { AppDispatch, RootState } from "../../../app/store";
-import { getPersonalDate } from "../../../app/slices/profile/personal_data";
+import { getPersonalData } from "../../../app/slices/profile/personal_data";
 import { useNavigate } from "react-router-dom";
 import HashTagItem from "./HashtagComponent/hashtagItem";
 import HashTagInput from "./HashtagComponent/hashtagInput";
 import ProfileImage from "../../../CustomComponent/ProfileImg";
-import { fetchUser } from "../../../app/slices/user/user";
+import { getUserInfo } from "../../../app/slices/user/user";
 
 const UserInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -24,22 +24,22 @@ const UserInfo = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user.user_id) {
-      dispatch(getPersonalDate(user.user_id));
-      setOneLineIntroduce(personalDate.one_line_introduce);
+    if (user.id) {
+      dispatch(getUserInfo());
+      setOneLineIntroduce(personalDate.oneLineIntroduce);
       setNickname(personalDate.nickname);
     }
-  }, [dispatch, user.user_id]);
+  }, [dispatch, user.id]);
 
   useEffect(() => {
     if (personalDate.nickname) {
-      setOneLineIntroduce(personalDate.one_line_introduce);
+      setOneLineIntroduce(personalDate.oneLineIntroduce);
       setNickname(personalDate.nickname);
     }
   }, [dispatch, personalDate.nickname]);
 
   useEffect(() => {
-    dispatch(fetchUser());
+    dispatch(getUserInfo());
   }, [dispatch]);
 
   const handleNicknameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,8 +93,8 @@ const UserInfo = () => {
       const hashtagsJsonString = JSON.stringify(hashTag);
       formData.append("hashtags", hashtagsJsonString);
 
-      const response = await axios.post(
-        `/profile/update/${user.user_id}`,
+      const response = await axios.put(
+        `/users/profiles/${user.id}/personaldatas`,
         formData,
         {
           withCredentials: true,
@@ -105,7 +105,7 @@ const UserInfo = () => {
       );
 
       if (response.status === 200) {
-        window.location.href = `/profile/${user.user_id}`;
+        window.location.href = `/profile/${user.id}`;
       } else {
         console.error("Failed to update user information");
       }
@@ -134,7 +134,7 @@ const UserInfo = () => {
           {uploadedImage != null ? (
             <img src={uploadedImage} alt="User Profile" />
           ) : (
-            <ProfileImage id={user.user_id || "default"} />
+            <ProfileImage id={user.id || "default"} />
           )}
         </ImageBox>
         <input
@@ -154,7 +154,7 @@ const UserInfo = () => {
           type="text"
           value={
             one_line_introduce == undefined
-              ? personalDate.one_line_introduce
+              ? personalDate.oneLineIntroduce
               : one_line_introduce
           }
           onChange={handleIntroduceChange}
@@ -177,9 +177,7 @@ const UserInfo = () => {
         </HashTagBox>
       </InputBox>
       <FuncBox>
-        <Button onClick={() => navigator(`/profile/${user.user_id}`)}>
-          취소
-        </Button>
+        <Button onClick={() => navigator(`/profile/${user.id}`)}>취소</Button>
         <Button onClick={saveChangedUserInfo}>저장</Button>
       </FuncBox>
     </Container>

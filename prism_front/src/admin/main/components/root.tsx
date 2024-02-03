@@ -19,16 +19,16 @@ const Root: React.FC<setAdmin_info> = ({ setAdmin_info }) => {
     try {
       const loginResult = (
         await axios.post(
-          "/admin/user/login",
+          "/admins/login",
           { password: password },
           {
             withCredentials: true,
           }
         )
       ).data;
-      if (loginResult?.admin_info.id != "") {
-        setAdmin_info(loginResult?.admin_info);
-        navigate(`/admin/home/${loginResult?.admin_info.id}`);
+      if (loginResult?.id != "") {
+        setAdmin_info(loginResult);
+        navigate(`/admin/home/${loginResult?.id}`);
       } else {
         alert("접근 번호를 정확히 입력하세요.");
       }

@@ -5,24 +5,23 @@ import { useSelector, useDispatch } from "react-redux";
 import BeforeLogin from "./beforeLogin";
 import AfterLogin from "./afterLogin";
 import { AppDispatch, RootState } from "../../app/store";
-import { fetchUser } from "../../app/slices/user/user";
+import { getUserInfo } from "../../app/slices/user/user";
 
 const FuncBar: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const userInfo = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
-    const userLoginCookie = document.cookie.includes("user_login");
+    const userLoginCookie = document.cookie.includes("User");
     if (userLoginCookie) {
-      // fetchUserInfo 액션 디스패치
-      dispatch(fetchUser());
+      // fetchUserInfo 액션 디스패치 여기에 id 값을 넣어야해 여기는 userInfo
+      dispatch(getUserInfo());
     }
-  }, [dispatch]);
-
+  }, [dispatch, userInfo]);
   return (
     <Box>
-      {userInfo.user_id != "" ? (
-        <AfterLogin userID={userInfo.user_id} />
+      {userInfo.id != "" ? (
+        <AfterLogin userID={userInfo.id} />
       ) : (
         <BeforeLogin />
       )}

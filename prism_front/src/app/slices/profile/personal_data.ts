@@ -3,22 +3,22 @@ import axios from "../../../configs/AxiosConfig";
 
 interface PersonalData {
   nickname: string;
-  one_line_introduce: string;
+  oneLineIntroduce: string;
   hashtag: string[];
 }
 
 const initialState: PersonalData = {
   nickname: "",
-  one_line_introduce: "",
+  oneLineIntroduce: "",
   hashtag: [],
 };
 
-export const getPersonalDate = createAsyncThunk<
+export const getPersonalData = createAsyncThunk<
   PersonalData,
   string | undefined
 >("personal_data", async (id) => {
   const response = await axios.get<PersonalData>(
-    `/profile/personaldata/${id}`,
+    `/users/profiles/${id}/personaldatas`,
     {
       withCredentials: true,
     }
@@ -32,16 +32,16 @@ const personalDateSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getPersonalDate.fulfilled, (state, action) => {
+      .addCase(getPersonalData.fulfilled, (state, action) => {
         state.nickname = action.payload.nickname;
-        state.one_line_introduce = action.payload.one_line_introduce;
+        state.oneLineIntroduce = action.payload.oneLineIntroduce;
         if (action.payload?.hashtag == undefined) {
           state.hashtag = [];
         } else {
           state.hashtag = action.payload?.hashtag;
         }
       })
-      .addCase(getPersonalDate.rejected, (state, action) => {
+      .addCase(getPersonalData.rejected, (state, action) => {
         console.error("Error fetching user info:", action.error.message);
       });
   },

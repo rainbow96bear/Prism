@@ -14,6 +14,7 @@ interface AddTechModalProps {
 interface NewEntry {
   Tech_code: string;
   Tech_name: string;
+  count: number;
 }
 
 const AddTechModal: React.FC<AddTechModalProps> = ({
@@ -24,13 +25,14 @@ const AddTechModal: React.FC<AddTechModalProps> = ({
   const [newEntry, setNewEntry] = useState<NewEntry>({
     Tech_code: "",
     Tech_name: "",
+    count: 0,
   });
 
   const handleAdd = async () => {
     try {
       // Send a request to add a new entry
       const result = (
-        await axios.post("/admin/access/tech", newEntry, {
+        await axios.post("/admins/techs", newEntry, {
           withCredentials: true,
         })
       ).data;

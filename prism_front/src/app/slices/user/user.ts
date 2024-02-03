@@ -2,20 +2,18 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../../configs/AxiosConfig";
 
 interface User {
-  user_id: string;
-  nickname: string;
+  id: string;
 }
 
 const initialState: User = {
-  user_id: "",
-  nickname: "",
+  id: "",
 };
 
 // 비동기 작업을 처리하는 thunk 생성
-export const fetchUser = createAsyncThunk<User>(
-  "userInfo/fetchUser",
+export const getUserInfo = createAsyncThunk<User>(
+  "userInfo/getProfile",
   async () => {
-    const response = await axios.get<User>("/user/info", {
+    const response = await axios.get<User>(`/users/info`, {
       withCredentials: true,
     });
     return response.data; // API 응답에서 필요한 데이터를 반환
@@ -24,7 +22,7 @@ export const fetchUser = createAsyncThunk<User>(
 
 export const logout = createAsyncThunk("auth/logout", async () => {
   await axios.post(
-    "/OAuth/kakao/logout",
+    "/oauth/kakao/logout",
     {},
     {
       withCredentials: true,
@@ -40,20 +38,17 @@ const userSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchUser.fulfilled, (state, action) => {
+      .addCase(getUserInfo.fulfilled, (state, action) => {
         // 비동기 작업이 성공하면 상태를 업데이트
-        state.user_id = action.payload.user_id;
-        state.nickname = action.payload.nickname;
+        state.id = action.payload.id;
       })
-      .addCase(fetchUser.rejected, (state, action) => {
-        state.user_id = "";
-        state.nickname = "";
+      .addCase(getUserInfo.rejected, (state, action) => {
+        state.id = "";
         console.error("Error fetching user info:", action.error.message);
       })
       .addCase(logout.fulfilled, (state) => {
         // 로그아웃이 성공하면 상태를 초기화
-        state.user_id = "";
-        state.nickname = "";
+        state.id = "";
       })
       .addCase(logout.rejected, (state, action) => {
         console.error("Logout failed:", action.error.message);

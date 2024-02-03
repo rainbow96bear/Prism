@@ -9,23 +9,23 @@ const initialState: TechList = {
   tech_list: [],
 };
 
-export const getTechList = createAsyncThunk<TechList, string | undefined>(
-  "tech_data/getTechList",
+export const getUserTechList = createAsyncThunk<TechList, string | undefined>(
+  "tech_data/getUserTechList",
   async (id) => {
-    const response = await axios.get<TechList>(`/profile/techs/${id}`, {
+    const response = await axios.get<TechList>(`/users/profiles/${id}/techs`, {
       withCredentials: true,
     });
     return response.data;
   }
 );
 
-export const setTechList = createAsyncThunk<TechList>(
-  "tech_data/setTechList",
+export const setUserTechList = createAsyncThunk<TechList>(
+  "tech_data/setUserTechList",
   async (id, tech_list) => {
     const techListJsonString = JSON.stringify(tech_list);
 
-    const response = await axios.post<TechList>(
-      `/profile/techs/${id}`,
+    const response = await axios.put<TechList>(
+      `/users/profiles/${id}/techs`,
       techListJsonString,
       {
         withCredentials: true,
@@ -44,25 +44,24 @@ const techDataSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getTechList.fulfilled, (state, action) => {
-        console.log(action.payload);
+      .addCase(getUserTechList.fulfilled, (state, action) => {
         if (action.payload == undefined || action.payload == null) {
           state.tech_list = [];
         } else {
-          state.tech_list = action.payload?.tech_list;
+          state.tech_list = action.payload.tech_list;
         }
       })
-      .addCase(getTechList.rejected, (state, action) => {
+      .addCase(getUserTechList.rejected, (state, action) => {
         console.error("Error get tech list:", action.error.message);
       })
-      .addCase(setTechList.fulfilled, (state, action) => {
+      .addCase(setUserTechList.fulfilled, (state, action) => {
         if (action.payload.tech_list == undefined) {
           state.tech_list = [];
         } else {
           state.tech_list = action.payload.tech_list;
         }
       })
-      .addCase(setTechList.rejected, (state, action) => {
+      .addCase(setUserTechList.rejected, (state, action) => {
         console.error("Error get tech list:", action.error.message);
       });
   },
