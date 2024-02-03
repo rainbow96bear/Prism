@@ -15,7 +15,6 @@ export const getUserTechList = createAsyncThunk<TechList, string | undefined>(
     const response = await axios.get<TechList>(`/users/profiles/${id}/techs`, {
       withCredentials: true,
     });
-    console.log(response.data);
     return response.data;
   }
 );
@@ -46,7 +45,6 @@ const techDataSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getUserTechList.fulfilled, (state, action) => {
-        console.log(action.payload);
         if (action.payload == undefined || action.payload == null) {
           state.tech_list = [];
         } else {
