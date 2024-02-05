@@ -8,7 +8,7 @@ import Project from "./Components/project/project";
 import UserInfo from "./Components/update/userInfo";
 import TechList from "./Components/update/techList";
 
-const Main = () => {
+const User = () => {
   return (
     <MainContainer>
       <Routes>
@@ -23,7 +23,7 @@ const Main = () => {
   );
 };
 
-export default Main;
+export default User;
 
 const MainContainer = styled.div`
   height: 100%;

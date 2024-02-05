@@ -3,7 +3,7 @@ import { Route, Routes, BrowserRouter as Router } from "react-router-dom";
 import Modal from "react-modal";
 
 import Header from "./header/header";
-import Main from "./main/main";
+import User from "./body/user/user";
 import AdminMain from "./admin/main/main";
 
 Modal.setAppElement("#root");
@@ -58,7 +58,7 @@ const MainComponent = () => {
         <Header />
       </HeaderArea>
       <BodyArea>
-        <Main />
+        <User />
       </BodyArea>
     </>
   );
