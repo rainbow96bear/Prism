@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { FC } from "react";
-import { TechData } from "../../../../../GlobalType/Tech";
+import { TechData } from "../../../../../../GlobalType/Tech";
 
 const TechItem: FC<TechData> = ({ tech_name, level }) => {
   const maxLevel = 10;

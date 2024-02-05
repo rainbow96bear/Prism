@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { FC } from "react";
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { CiCircleMinus, CiCirclePlus } from "react-icons/ci";
-import { TechData } from "../../../../GlobalType/Tech";
+import { TechData } from "../../../../../GlobalType/Tech";
 
 interface TechItemProps extends TechData {
   onRemove: () => void;

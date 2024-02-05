@@ -1,39 +1,37 @@
 import styled from "styled-components";
 
-import { Admin } from "../../../GlobalType/Admin";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "./../../../configs/AxiosConfig";
+import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../app/store";
+import { useDispatch } from "react-redux";
+import { logout } from "../../../../app/slices/admin/admin";
 
-interface HomeProps {
-  admin_info: Admin | null;
-}
-
-const Home: React.FC<HomeProps> = ({ admin_info }) => {
+const Home = () => {
+  const admin_info = useSelector(
+    (state: RootState) => state.adminReducer.admin_info
+  );
+  const done = useSelector((state: RootState) => state.adminReducer.done);
   const navigate = useNavigate();
-  const logout = async () => {
-    try {
-      await axios.post(
-        "/admins/logout",
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-      navigate("/admin");
-    } catch (err) {
-      console.log(err);
-    }
+  const dispatch = useDispatch<AppDispatch>();
+  const logoutFunc = async () => {
+    dispatch(logout());
   };
   useEffect(() => {
-    navigate(`/admin/home/${admin_info?.id}`);
+    if (done) {
+      if (admin_info.id == "") {
+        navigate("/admin");
+      } else {
+        navigate(`/admin/home/${admin_info?.id}`);
+      }
+    }
   }, [admin_info]);
   return (
     <Box>
       <InfoBox>
         <div>Admin ID : {admin_info?.id}</div>
         <div>Admin Rank : {admin_info?.rank}</div>
-        <button onClick={logout}> 로그아웃 </button>
+        <button onClick={logoutFunc}> 로그아웃 </button>
       </InfoBox>
     </Box>
   );

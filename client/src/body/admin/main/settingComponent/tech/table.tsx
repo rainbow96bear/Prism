@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import axios from "./../../../../configs/AxiosConfig";
+import axios from "./../../../../../configs/AxiosConfig";
 
 interface TableProps {
   column: string[];

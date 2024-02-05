@@ -1,9 +1,9 @@
 import { Route, Routes } from "react-router-dom";
 import styled from "styled-components";
 
-const Chat = () => {
+const Messenger = () => {
   return (
-    <ChatContainer>
+    <MessengerContainer>
       <Routes>
         {/* <Route path={"/*"} element={<Root></Root>}></Route>
         <Route path={"/home"} element={<Home></Home>}></Route>
@@ -12,12 +12,12 @@ const Chat = () => {
         <Route path={"/profile/update/userinfo"} element={<UserInfo />}></Route>
         <Route path={"/profile/update/techlist"} element={<TechList />}></Route> */}
       </Routes>
-    </ChatContainer>
+    </MessengerContainer>
   );
 };
 
-export default Chat;
+export default Messenger;
 
-const ChatContainer = styled.div`
+const MessengerContainer = styled.div`
   height: 100%;
 `;

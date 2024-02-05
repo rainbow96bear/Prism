@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Table from "./table";
-import axios from "./../../../../configs/AxiosConfig";
+import axios from "./../../../../../configs/AxiosConfig";
 import AddTechModal from "./modal";
 
 // Tech 컴포넌트
@@ -27,7 +27,6 @@ const Tech = () => {
         withCredentials: true,
       })
     ).data;
-    console.log(list);
     setInfo(list);
     setSortedInfo(list);
   };

@@ -4,8 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 
 import BeforeLogin from "./beforeLogin";
 import AfterLogin from "./afterLogin";
-import { AppDispatch, RootState } from "../../app/store";
-import { getUserInfo } from "../../app/slices/user/user";
+import { AppDispatch, RootState } from "../../../app/store";
+import { getUserInfo } from "../../../app/slices/user/user";
 
 const FuncBar: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

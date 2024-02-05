@@ -2,19 +2,30 @@ import styled from "styled-components";
 import { Route, Routes, BrowserRouter as Router } from "react-router-dom";
 import Modal from "react-modal";
 
-import Header from "./header/header";
+import Header from "./header/user/header";
 import User from "./body/user/user";
-import AdminMain from "./admin/main/main";
+import AdminMain from "./body/admin/main/main";
+import Messenger from "./body/messenger/messenger";
+import AdminHeader from "./header/admin/header";
 
 Modal.setAppElement("#root");
 
 function App() {
   return (
     <Box>
-      <Routes>
-        <Route path="/*" element={<MainComponent />} />
-        <Route path="/admin/*" element={<AdminComponent />} />
-      </Routes>
+      <HeaderArea>
+        <Routes>
+          <Route path="/*" element={<Header />} />
+          <Route path="/admin/*" element={<AdminHeader />} />
+        </Routes>
+      </HeaderArea>
+      <BodyArea>
+        <Routes>
+          <Route path="/*" element={<User />} />
+          <Route path="/messenger" element={<Messenger />} />
+          <Route path="/admin/*" element={<AdminMain />} />
+        </Routes>
+      </BodyArea>
     </Box>
   );
 }
@@ -42,26 +53,5 @@ const BodyArea = styled.div`
   border-bottom: none;
   position: relative;
 `;
-
-const AdminComponent = () => {
-  return (
-    <>
-      <AdminMain></AdminMain>
-    </>
-  );
-};
-
-const MainComponent = () => {
-  return (
-    <>
-      <HeaderArea>
-        <Header />
-      </HeaderArea>
-      <BodyArea>
-        <User />
-      </BodyArea>
-    </>
-  );
-};
 
 export default App;

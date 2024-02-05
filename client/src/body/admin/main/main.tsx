@@ -1,67 +1,59 @@
 import styled from "styled-components";
 import { Route, Routes, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "./../../configs/AxiosConfig";
-
-import { Admin } from "../../GlobalType/Admin";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { getAdminAuth } from "../../../app/slices/admin/admin";
+import { AppDispatch, RootState } from "../../../app/store";
 import Root from "./components/root";
 import Home from "./components/home";
-import Loading from "../../CustomComponent/Loading";
-import AdminHeader from "../header/header";
 import Setting from "./settingComponent/setting";
+import Loading from "../../../CustomComponent/Loading";
 
 const AdminMain = () => {
-  const [admin_info, setAdmin_info] = useState<Admin | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const isAdmin = useSelector((state: RootState) => state.adminReducer.isAdmin);
+  const done = useSelector((state: RootState) => state.adminReducer.done);
+  const admin_info = useSelector(
+    (state: RootState) => state.adminReducer.admin_info
+  );
   useEffect(() => {
-    const originURL = window.location.pathname;
-    const checkAdmin = async () => {
-      try {
-        const checkResult = (
-          await axios.get("/admins/authorization", {
-            withCredentials: true,
-          })
-        ).data;
-        if (checkResult?.isAdmin == false) {
-          navigate("/");
-        } else if (checkResult?.admin_info.id == "") {
-          navigate("/admin");
-        } else if (checkResult?.admin_info.id != "") {
-          if (originURL == "/admin") {
-            navigate("/admin/home");
-          } else {
-            navigate(originURL);
-          }
+    try {
+      dispatch(getAdminAuth());
+    } catch (error) {
+      console.error("Admin 정보를 가져오는 중 에러 발생:", error);
+    }
+  }, [dispatch]);
+  useEffect(() => {
+    if (done) {
+      const originURL = window.location.pathname;
+      if (isAdmin === false) {
+        navigate("/");
+      } else if (admin_info.id === "") {
+        navigate("/admin");
+      } else if (admin_info.id !== "") {
+        if (originURL === "/admin") {
+          navigate("/admin/home");
+        } else {
+          navigate(originURL);
         }
-        setAdmin_info(checkResult?.admin_info);
-        setIsAdmin(checkResult?.isAdmin);
-      } catch (error) {
-        console.error("Admin 확인 중 에러 발생:", error);
       }
-    };
-
-    checkAdmin();
-  }, [window.location.pathname]);
-
+    }
+  }, [isAdmin, admin_info, navigate]);
   return (
     <>
-      {admin_info?.id != null ? (
-        <HeaderArea>
-          <AdminHeader></AdminHeader>
-        </HeaderArea>
-      ) : (
-        <></>
-      )}
       <BodyArea>
-        <Box>
-          <Routes>
-            <Route path="/" element={<Root setAdmin_info={setAdmin_info} />} />
-            <Route path="/home/*" element={<Home admin_info={admin_info} />} />
-            <Route path="/setting/*" element={<Setting></Setting>} />
-          </Routes>
-        </Box>
+        {done ? (
+          <Box>
+            <Routes>
+              <Route path="/" element={<Root />} />
+              <Route path="/home/*" element={<Home />} />
+              <Route path="/setting/*" element={<Setting />} />
+            </Routes>
+          </Box>
+        ) : (
+          <Loading></Loading>
+        )}
       </BodyArea>
     </>
   );

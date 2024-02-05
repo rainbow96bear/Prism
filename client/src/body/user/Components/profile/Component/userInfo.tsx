@@ -3,9 +3,9 @@ import { useEffect } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 
-import { AppDispatch, RootState } from "../../../../app/store";
-import { getPersonalData } from "../../../../app/slices/profile/personal_data";
-import ProfileImage from "../../../../CustomComponent/ProfileImg";
+import { AppDispatch, RootState } from "../../../../../app/store";
+import { getPersonalData } from "../../../../../app/slices/profile/personal_data";
+import ProfileImage from "../../../../../CustomComponent/ProfileImg";
 
 const UserInfo = () => {
   const dispatch = useDispatch<AppDispatch>();

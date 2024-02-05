@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Modal from "react-modal";
 import styled from "styled-components";
-import axios from "./../../../../configs/AxiosConfig";
+import axios from "./../../../../../configs/AxiosConfig";
 
 interface AddTechModalProps {
   isOpen: boolean;

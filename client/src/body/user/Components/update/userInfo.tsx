@@ -2,14 +2,14 @@ import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 
-import axios from "./../../../configs/AxiosConfig";
-import { AppDispatch, RootState } from "../../../app/store";
-import { getPersonalData } from "../../../app/slices/profile/personal_data";
+import axios from "./../../../../configs/AxiosConfig";
+import { AppDispatch, RootState } from "../../../../app/store";
+import { getPersonalData } from "../../../../app/slices/profile/personal_data";
 import { useNavigate } from "react-router-dom";
 import HashTagItem from "./HashtagComponent/hashtagItem";
 import HashTagInput from "./HashtagComponent/hashtagInput";
-import ProfileImage from "../../../CustomComponent/ProfileImg";
-import { getUserInfo } from "../../../app/slices/user/user";
+import ProfileImage from "../../../../CustomComponent/ProfileImg";
+import { getUserInfo } from "../../../../app/slices/user/user";
 
 const UserInfo = () => {
   const dispatch = useDispatch<AppDispatch>();

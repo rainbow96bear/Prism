@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import loginImg from "./../../assets/kakao_login_small.png";
+import loginImg from "./../../../assets/kakao_login_small.png";
 
 const BeforeLogin: React.FC = () => {
   // oauth 요청 URL

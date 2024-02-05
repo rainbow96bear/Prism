@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { useDispatch } from "react-redux";
-import { AppDispatch, RootState } from "../../../app/store";
+import { AppDispatch, RootState } from "../../../../app/store";
 import { useSelector } from "react-redux";
-import { getUserTechList } from "../../../app/slices/profile/tech_data";
+import { getUserTechList } from "../../../../app/slices/profile/tech_data";
 import TechItem from "./TechListComponent/techItem";
 import styled from "styled-components";
-import { TechData, TechInfo } from "../../../GlobalType/Tech";
+import { TechData, TechInfo } from "../../../../GlobalType/Tech";
 import { useNavigate } from "react-router";
-import axios from "../../../configs/AxiosConfig";
+import axios from "../../../../configs/AxiosConfig";
 
 const TechList = () => {
   const dispatch = useDispatch<AppDispatch>();

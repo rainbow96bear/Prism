@@ -5,11 +5,11 @@ import { FaRegEdit } from "react-icons/fa";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import DropDown from "../../CustomComponent/DropDown";
-import { TitlePath } from "../../GlobalType/TitlePath";
-import { AppDispatch, RootState } from "../../app/store";
-import { logout } from "../../app/slices/user/user";
-import ProfileImage from "../../CustomComponent/ProfileImg";
+import DropDown from "../../../CustomComponent/DropDown";
+import { TitlePath } from "../../../GlobalType/TitlePath";
+import { AppDispatch, RootState } from "../../../app/store";
+import { logout } from "../../../app/slices/user/user";
+import ProfileImage from "../../../CustomComponent/ProfileImg";
 import { useNavigate } from "react-router-dom";
 
 interface AfterLoginProps {

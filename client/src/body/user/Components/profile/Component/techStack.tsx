@@ -1,11 +1,11 @@
 import styled from "styled-components";
 import { useDispatch } from "react-redux";
 import TechItem from "./Item/techItem";
-import { AppDispatch, RootState } from "../../../../app/store";
+import { AppDispatch, RootState } from "../../../../../app/store";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
 import { useEffect } from "react";
-import { getUserTechList } from "../../../../app/slices/profile/tech_data";
+import { getUserTechList } from "../../../../../app/slices/profile/tech_data";
 const TechStack = () => {
   const { id } = useParams();
 

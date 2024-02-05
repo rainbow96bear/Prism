@@ -1,13 +1,18 @@
-import axios from "./../../../configs/AxiosConfig";
+import axios from "./../../../../configs/AxiosConfig";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { AppDispatch, RootState } from "../../../../app/store";
+import { login } from "../../../../app/slices/admin/admin";
+import { useSelector } from "react-redux";
 
-interface setAdmin_info {
-  setAdmin_info: Function;
-}
-
-const Root: React.FC<setAdmin_info> = ({ setAdmin_info }) => {
+const Root = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const loginResult = useSelector(
+    (state: RootState) => state.adminReducer.admin_info
+  );
+  const done = useSelector((state: RootState) => state.adminReducer.done);
   const navigate = useNavigate();
   const [password, setPassword] = useState(""); // 입력한 비밀번호를 상태로 관리
 
@@ -15,27 +20,16 @@ const Root: React.FC<setAdmin_info> = ({ setAdmin_info }) => {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = async () => {
-    try {
-      const loginResult = (
-        await axios.post(
-          "/admins/login",
-          { password: password },
-          {
-            withCredentials: true,
-          }
-        )
-      ).data;
-      if (loginResult?.id != "") {
-        setAdmin_info(loginResult);
-        navigate(`/admin/home/${loginResult?.id}`);
-      } else {
-        alert("접근 번호를 정확히 입력하세요.");
-      }
-    } catch (error) {
-      console.error("Admin 정보를 가져오는 중 에러 발생:", error);
-    }
+  const handleSubmit = () => {
+    dispatch(login(password));
   };
+  useEffect(() => {
+    if (done) {
+      if (loginResult?.id != "") {
+        navigate(`/admin/home/${loginResult?.id}`);
+      }
+    }
+  }, [loginResult, navigate]);
 
   return (
     <Box>
