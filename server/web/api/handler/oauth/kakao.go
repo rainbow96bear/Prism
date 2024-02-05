@@ -13,8 +13,5 @@ type KakaoHandler struct {
 // kakao OAuth handler
 func (k *KakaoHandler) RegisterHandlers(r *mux.Router) {
 	r.HandleFunc("/login", k.KakaoOAuth.Login).Methods("GET")
-	r.HandleFunc("/login", k.KakaoOAuth.Logout).Methods("POST")
-	// r.HandleFunc("/userino",).Methods("GET")
-	// r.HandleFunc("/techs", a.Techs.GetTechListForAdmin).Methods("GET")
-	// r.HandleFunc("/techs", a.Techs.AddTechForAdmin).Methods("POST")
+	r.HandleFunc("/logout", k.KakaoOAuth.Logout).Methods("POST")
 }
