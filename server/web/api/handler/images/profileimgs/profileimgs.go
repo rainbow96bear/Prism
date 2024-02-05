@@ -19,10 +19,6 @@ var fileServer = http.FileServer(http.Dir(imageDirectory))
 
 
 func (p *Profileimgs) RegisterHandlers(r *mux.Router) {
-	// r.HandleFunc("/tech", profileimg.ReadImg).Methods("GET")
-	// r.HandleFunc("/tech", tech.GetTechList).Methods("POST")
-	// r.HandleFunc("/tech", tech.GetTechList).Methods("DELETE")
-	// r.HandleFunc("/tech", tech.GetTechList).Methods("PATCH")
 	currentDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Error getting current directory:", err)

@@ -23,6 +23,5 @@ func (u *UsersHandler)RegisterHandlers(r *mux.Router) {
 	r.HandleFunc("/profiles/{id}/techs", u.Techs.GetUserTechList).Methods("GET")
 	r.HandleFunc("/profiles/{id}/techs", u.ProfilesMiddleware.CheckAccess(u.Techs.UpdateUserTechList)).Methods("PUT")
 
-	// 프로필에 기술 스택 추가 시 기술 스택 목록을 위한 기술스택 이름 배열
 }
 
