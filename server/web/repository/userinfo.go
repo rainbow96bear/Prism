@@ -2,8 +2,8 @@ package repository
 
 import (
 	"database/sql"
-	"prism_back/errors"
-	"prism_back/pkg/models"
+	"prism/web/errors"
+	"prism/web/pkg/models"
 )
 
 type UserInfoReopository struct {

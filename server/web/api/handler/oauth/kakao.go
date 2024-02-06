@@ -1,7 +1,7 @@
 package oauth
 
 import (
-	service "prism_back/service/oauth"
+	service "prism/web/service/oauth"
 
 	"github.com/gorilla/mux"
 )

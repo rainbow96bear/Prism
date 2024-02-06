@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"prism_back/pkg/models"
+	"prism/web/pkg/models"
 )
 
 type TechRepository struct {

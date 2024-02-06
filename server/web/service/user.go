@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"prism_back/dto"
-	"prism_back/internal/session"
+	"prism/web/dto"
+	"prism/web/internal/session"
 )
 
 type User struct {

@@ -7,11 +7,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"prism_back/dto"
-	"prism_back/errors"
-	"prism_back/internal/Database/mysql"
-	"prism_back/pkg"
-	"prism_back/repository"
+	"prism/web/dto"
+	"prism/web/errors"
+	"prism/web/internal/Database/mysql"
+	"prism/web/pkg"
+	"prism/web/repository"
 
 	"github.com/gorilla/mux"
 )

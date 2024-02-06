@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"prism_back/errors"
+	"prism/web/errors"
 
 	"github.com/nfnt/resize"
 )

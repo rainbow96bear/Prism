@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"prism_back/dto"
-	"prism_back/errors"
-	"prism_back/internal/Database/mysql"
-	"prism_back/internal/session"
-	"prism_back/repository"
+	"prism/web/dto"
+	"prism/web/errors"
+	"prism/web/internal/Database/mysql"
+	"prism/web/internal/session"
+	"prism/web/repository"
 
 	"golang.org/x/crypto/bcrypt"
 )

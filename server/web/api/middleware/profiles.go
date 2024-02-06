@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	"prism_back/internal/session"
+	"prism/web/internal/session"
 
 	"github.com/gorilla/mux"
 )

@@ -5,9 +5,9 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"prism_back/dto"
-	"prism_back/internal/Database/mysql"
-	"prism_back/repository"
+	"prism/web/dto"
+	"prism/web/internal/Database/mysql"
+	"prism/web/repository"
 
 	"github.com/gorilla/mux"
 )

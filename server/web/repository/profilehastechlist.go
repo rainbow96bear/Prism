@@ -2,8 +2,8 @@ package repository
 
 import (
 	"database/sql"
-	"prism_back/dto"
-	"prism_back/pkg/models"
+	"prism/web/dto"
+	"prism/web/pkg/models"
 )
 
 type ProfileHasTechListRepository struct {

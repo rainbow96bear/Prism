@@ -1,8 +1,8 @@
 package router
 
 import (
-	"prism_back/api/handler"
-	"prism_back/api/handler/oauth"
+	"prism/web/api/handler"
+	"prism/web/api/handler/oauth"
 
 	"github.com/gorilla/mux"
 )

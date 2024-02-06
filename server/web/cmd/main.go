@@ -5,19 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"prism_back/api/router"
-	"prism_back/internal/Database/mysql"
-	"prism_back/internal/session"
-	"prism_back/service"
+	"prism/web/api/router"
+	"prism/web/internal/Database/mysql"
+	"prism/web/internal/session"
+	"prism/web/service"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
-
-type Router struct {
-	// router.Assets
-	// router.API
-}
 
 var (
 	assets router.Assets = router.Assets{}

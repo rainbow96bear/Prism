@@ -10,14 +10,14 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"prism_back/dto"
-	"prism_back/dto/oauth"
-	"prism_back/errors"
-	"prism_back/internal/Database/mysql"
-	"prism_back/internal/session"
-	"prism_back/pkg"
-	"prism_back/pkg/models"
-	"prism_back/repository"
+	"prism/web/dto"
+	"prism/web/dto/oauth"
+	"prism/web/errors"
+	"prism/web/internal/Database/mysql"
+	"prism/web/internal/session"
+	"prism/web/pkg"
+	"prism/web/pkg/models"
+	"prism/web/repository"
 )
 
 

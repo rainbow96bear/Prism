@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"prism_back/api/middleware"
-	"prism_back/service"
+	"prism/web/api/middleware"
+	"prism/web/service"
 
 	"github.com/gorilla/mux"
 )

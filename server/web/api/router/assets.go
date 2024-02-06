@@ -1,7 +1,7 @@
 package router
 
 import (
-	router "prism_back/api/router/assets"
+	router "prism/web/api/router/assets"
 
 	"github.com/gorilla/mux"
 )

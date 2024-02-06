@@ -1,7 +1,7 @@
 package router
 
 import (
-	handler "prism_back/api/handler/images/profileimgs"
+	handler "prism/web/api/handler/images/profileimgs"
 
 	"github.com/gorilla/mux"
 )
